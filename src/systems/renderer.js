@@ -1,78 +1,78 @@
-import { defineQuery } from 'https://esm.run/bitecs'
-import { Camera, Position, Sprite, SpriteSheet } from '../components/index.js'
+import { defineQuery, hasComponent } from 'https://esm.run/bitecs'
+import { Camera, Collider, Position, Sprite, SpriteSheet } from '../components/index.js'
 import { PositionProxy } from '../proxies/vector2.js'
 import { Vector2 } from '../utils/math.js'
 
 export default (canvas) => {
-	const spriteQuery = defineQuery([Position, Sprite])
-	const cameraQuery = defineQuery([Position, Camera])
-	const cameraPosition = new PositionProxy(0)
-	const position = new PositionProxy(0)
+  const spriteQuery = defineQuery([Position, Sprite])
+  const cameraQuery = defineQuery([Position, Camera])
+  const cameraPosition = new PositionProxy(0)
+  const position = new PositionProxy(0)
 
-	let translation = new Vector2(0, 0)
-	return world => {
-		canvas.cls()
+  let translation = new Vector2(0, 0)
+  return world => {
+    canvas.cls()
 
-		cameraPosition.eid = cameraQuery(world)[0]
+    cameraPosition.eid = cameraQuery(world)[0]
 
-		let dx = 0
-		let dy = 0
+    let dx = 0
+    let dy = 0
 
-		if (cameraPosition.x != translation.x) {
-			dx = cameraPosition.x - translation.x
-		}
+    if (cameraPosition.x != translation.x) {
+      dx = cameraPosition.x - translation.x
+    }
 
-		if (cameraPosition.x == translation.x) {
-			dy = cameraPosition.y - translation.y
-		}
+    if (cameraPosition.x == translation.x) {
+      dy = cameraPosition.y - translation.y
+    }
 
-		canvas.trans(-dx, -dy)
+    canvas.trans(-dx, -dy)
 
-		translation.x += dx
-		translation.y += dy
+    translation.x += dx
+    translation.y += dy
 
-		const entities = spriteQuery(world)
-		for (let index = 0; index < entities.length; index++) {
-			const id = entities[index]
-			position.eid = id
+    const entities = spriteQuery(world)
+    for (let index = 0; index < entities.length; index++) {
+      const id = entities[index]
+      position.eid = id
 
-			canvas.push()
+      canvas.push()
 
-			const ssid = Sprite.spritesheet[id]
-			const tid = SpriteSheet.texture[ssid]
-			const halfWidth = SpriteSheet.frameWidth[ssid] / 2
-			const flipX = Sprite.scaleX[id] < 0
-			const xOffset = flipX ? halfWidth : 0
+      const ssid = Sprite.spritesheet[id]
+      const tid = SpriteSheet.texture[ssid]
+      const halfWidth = SpriteSheet.frameWidth[ssid] / 2
+      const flipX = Sprite.scaleX[id] < 0
+      const xOffset = flipX ? halfWidth : 0
 
-			canvas.trans(position.x + xOffset, position.y)
-			canvas.rot(Sprite.rotation[id])
-			canvas.scale(Sprite.scaleX[id], Sprite.scaleY[id])
+      canvas.trans(position.x + xOffset, position.y)
+      canvas.rot(Sprite.rotation[id])
+      canvas.scale(Sprite.scaleX[id], Sprite.scaleY[id])
 
-			const x = (Sprite.frame[id] % SpriteSheet.columns[ssid]) * SpriteSheet.frameWidth[ssid]
-			const y = Math.floor(Sprite.frame[id] / SpriteSheet.columns[ssid]) * SpriteSheet.frameHeight[ssid]
+      const x = (Sprite.frame[id] % SpriteSheet.columns[ssid]) * SpriteSheet.frameWidth[ssid] + SpriteSheet.offsetX[ssid]
+      const y = Math.floor(Sprite.frame[id] / SpriteSheet.columns[ssid]) * SpriteSheet.frameHeight[ssid] + SpriteSheet.offsetY[ssid]
 
-			const texture = world.textures[tid]
-			const u0 = x / texture.width
-			const v0 = y / texture.height
-			const u1 = u0 + (SpriteSheet.frameWidth[ssid] / texture.width)
-			const v1 = v0 + (SpriteSheet.frameHeight[ssid] / texture.height)
+      const texture = world.textures[tid]
+      const u0 = x / texture.width
+      const v0 = y / texture.height
+      const u1 = u0 + (SpriteSheet.frameWidth[ssid] / texture.width)
+      const v1 = v0 + (SpriteSheet.frameHeight[ssid] / texture.height)
 
-			canvas.img(
-				texture,
-				-xOffset,
-				0,
-				SpriteSheet.frameWidth[ssid],
-				SpriteSheet.frameHeight[ssid],
-				u0,
-				v0,
-				u1,
-				v1
-			)
+      canvas.img(
+        texture,
+        -xOffset,
+        0,
+        SpriteSheet.frameWidth[ssid],
+        SpriteSheet.frameHeight[ssid],
+        u0,
+        v0,
+        u1,
+        v1
+      )
 
-			canvas.pop()
-		}
+      canvas.pop()
+    }
 
-		canvas.flush()
-		return world
-	}
+    canvas.flush()
+    return world
+  }
 }

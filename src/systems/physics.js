@@ -37,7 +37,6 @@ export default () => {
 
 	const vector = Matter.Vector.create()
 	const force = Matter.Vector.create()
-
 	return world => {
 		const collisions = Detector.collisions(detector)
 
@@ -75,7 +74,7 @@ export default () => {
 
 			if (collisions.length > 0) {
 				const ownCollisions = collisions.filter(col => col.bodyA.id == composite.id || col.bodyB.id == composite.id)
-				body.grounded = ownCollisions.some(col => col.normal.y == -1) ? 1 : 0
+				body.grounded = ownCollisions.some(col => col.normal.y < -.9) ? 1 : 0
 			} else {
 				body.grounded = 0
 			}

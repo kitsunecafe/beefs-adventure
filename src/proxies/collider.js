@@ -10,4 +10,11 @@ export class RectProxy extends Vector2Proxy {
 
 export class ColliderProxy extends RectProxy {
 	constructor(eid) { super(Collider, eid) }
+
+	get offsetX() { return this.store.offsetX[this.eid] }
+	set offsetX(val) { this.store.offsetX[this.eid] = val }
+
+	get offsetY() { return this.store.offsetY[this.eid] }
+	set offsetY(val) { this.store.offsetY[this.eid] = val }
+	
 }

@@ -7,6 +7,5 @@ export const Camera = defineComponent({
 	width: Types.f32,
 	height: Types.f32,
 
-	following: Types.eid,
+	following: Types.eid
 })
-

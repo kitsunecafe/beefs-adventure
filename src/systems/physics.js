@@ -1,11 +1,12 @@
-import { defineQuery, enterQuery, exitQuery, hasComponent } from 'https://esm.run/bitecs'
+import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from 'https://esm.run/bitecs'
 import Matter from 'https://esm.run/matter-js'
-import { Body, Collider, Dynamic, Intent } from '../components/index.js'
+import { Body, Collider, Contact, Dynamic, Intent, Sensor } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { BodyProxy } from '../proxies/body.js'
 import { PositionProxy } from '../proxies/vector2.js'
 import { IntentProxy } from "../proxies/intent.js"
 import Store from '../utils/store.js'
+import { ContactProxy } from '../proxies/contact.js'
 
 const Bodies = Matter.Bodies
 const Composite = Matter.Composite
@@ -25,20 +26,34 @@ export default () => {
 	const bodyAdded = enterQuery(bodyQuery)
 	const bodyRemoved = exitQuery(bodyQuery)
 
+	const dynamicQuery = defineQuery([Body, Collider, Dynamic])
+
 	const intentQuery = defineQuery([Intent])
 
 	const body = new BodyProxy(0)
 	const position = new PositionProxy(0)
 	const collider = new ColliderProxy(0)
 	const intent = new IntentProxy(0)
+	const contact = new ContactProxy(0)
 
-	const staticOptions = { isStatic: true, friction: 0 }
-	const dynamicOptions = { friction: 0 }
+	let options = { isStatic: false, friction: 0, isSensor: 0 }
 
 	const vector = Matter.Vector.create()
 	const force = Matter.Vector.create()
 	return world => {
 		const collisions = Detector.collisions(detector)
+
+		for (let i = 0; i < collisions.length; i++) {
+			const collision = collisions[i]
+			contact.eid = addEntity(world)
+			addComponent(world, Contact, contact.eid)
+
+			contact.a = collision.bodyA.eid
+			contact.b = collision.bodyB.eid
+
+			contact.normalX = collision.normal.x
+			contact.normalY = collision.normal.y
+		}
 
 		bodyRemoved(world).forEach(id => {
 			collider.eid = body.eid = position.eid = id
@@ -52,11 +67,15 @@ export default () => {
 
 		bodyAdded(world).forEach(id => {
 			collider.eid = body.eid = position.eid = id
-			const options = hasComponent(world, Dynamic, id) ? dynamicOptions : staticOptions
+
+			options.isStatic = !hasComponent(world, Dynamic, id)
+			options.isSensor = hasComponent(world, Sensor, id)
+
 			const composite = Bodies.rectangle(collider.x, collider.y, collider.width, collider.height, options)
 			Matter.Body.setMass(composite, body.mass)
 			Matter.Body.rotate(composite, 0)
 			Matter.Body.scale(composite, 1, 1)
+			composite.eid = id
 
 			body.index = composites.add(composite)
 			Composite.add(physicsWorld, composite)
@@ -65,19 +84,19 @@ export default () => {
 			Detector.setBodies(detector, composites.items.filter(x => x))
 		})
 
-		bodyQuery(world).forEach(id => {
+		dynamicQuery(world).forEach(id => {
 			collider.eid = body.eid = position.eid = id
 
 			const composite = composites.get(body.index)
 			position.x = composite.position.x
 			position.y = composite.position.y
 
-			if (collisions.length > 0) {
-				const ownCollisions = collisions.filter(col => col.bodyA.id == composite.id || col.bodyB.id == composite.id)
-				body.grounded = ownCollisions.some(col => col.normal.y < -.9) ? 1 : 0
-			} else {
-				body.grounded = 0
-			}
+			// if (collisions.length > 0) {
+			// 	const ownCollisions = collisions.filter(col => col.bodyA.id == composite.id || col.bodyB.id == composite.id)
+			// 	body.grounded = ownCollisions.some(col => col.normal.y < -.9) ? 1 : 0
+			// } else {
+			// 	body.grounded = 0
+			// }
 		})
 
 		intentQuery(world).forEach(id => {
@@ -110,7 +129,7 @@ export default () => {
 			}
 		})
 
-		Engine.update(engine, world.delta * 1000)
+		Engine.update(engine, world.delta)
 		return world
 	}
 }

@@ -1,11 +1,10 @@
-import { addComponent, defineQuery, enterQuery, hasComponent } from 'https://esm.run/bitecs'
+import { defineQuery } from 'https://esm.run/bitecs'
 import { Collider } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { PositionProxy } from '../proxies/vector2.js'
 
 export default () => {
 	const query = defineQuery([Collider])
-	// const enter = enterQuery(query)
 	const collider = new ColliderProxy(0)
 	const position = new PositionProxy(0)
 
@@ -15,8 +14,8 @@ export default () => {
 		entities.forEach(id => {
 			collider.eid = position.eid = id
 
-			collider.x = position.x
-			collider.y = position.y
+			collider.x = position.x + Math.floor(collider.width / 2) - collider.offsetX
+			collider.y = position.y + Math.floor(collider.height / 2) - collider.offsetY
 		})
 
 		return world

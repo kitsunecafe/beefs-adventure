@@ -62,36 +62,15 @@ function blockCreator(world, creator, fw, fh, tiles) {
   const hfh = fh / 2
 
   return (x, y, w, h) => {
-    const colW = w * fw
-    const colH = h * fh
-    const colX = x + Math.floor(colW / 2) - hfw
-    const colY = y + Math.floor(colH / 2) - hfh
-    createCollider(world, colX, colY, colW, colH)
+    createCollider(world, x, y, w * fw, h * fh, hfw, hfh)
     createPlatform(creator, x, y, w, h, tiles, width)
   }
 }
 
-/*
-w = 10
-0 = 0
-1 = 1
-2 = 2
-3 = 1
-4 = 2
-5 = 1
-6 = 2
-6 % 
-7 = 1
-8 = 2
-9 = 1
-10 = 3
-*/
 const getTile = (max, width) => i => {
   if (i === 0) return 0
-  if (i === max) return width 
-  const value = (i % (width - 1)) + 1
-  // console.log(i, '->', value)
-  return value
+  else if (i === max) return width
+  else return (i % (width - 1)) + 1
 }
 const index2d = w => (x, y) => w * y + x
 

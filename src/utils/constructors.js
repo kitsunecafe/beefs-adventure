@@ -1,15 +1,16 @@
 import { addComponent, addEntity } from 'https://esm.run/bitecs'
 import {
   Animation,
+  Audio,
   Body,
   Camera,
   Collider,
   Coin,
+  CoinAnimation,
   CurrentAnimation,
   Dynamic,
   EntityAnimation,
   Intent,
-  Player,
   Position,
   ReceivesInput,
   Sensor,
@@ -67,13 +68,26 @@ export function createCamera(world, canvas, target) {
   return eid
 }
 
+export function createAudio(world, audio) {
+  const eid = addEntity(world)
+  addComponent(world, Audio, eid)
+  Audio.id[eid] = audio
+  return eid
+}
+
 export function createCoin(world, x, y) {
-  const anim = createAnimation(world, 6, 10)
+  const spin = createAnimation(world, 6, 10, 0)
+  const collect = createAnimation(world, 6, 10, 7, false)
+
   const ss = createSpriteSheet(world, world.textureIDs.coin, 8)
   const eid = createCollider(world, x, y, 8, 8, 8, 8)
 
+  addComponent(world, CoinAnimation, eid)
+  CoinAnimation.spin[eid] = spin
+  CoinAnimation.collect[eid] = collect
+
   addComponent(world, CurrentAnimation, eid)
-  CurrentAnimation.id[eid] = anim
+  CurrentAnimation.id[eid] = spin
 
   addComponent(world, Sprite, eid)
   Sprite.spritesheet[eid] = ss
@@ -81,18 +95,21 @@ export function createCoin(world, x, y) {
   Sprite.scaleY[eid] = 1
 
   addComponent(world, Coin, eid)
+  Coin.audio[eid] = world.audioIDs.coin
+
   addComponent(world, Sensor, eid)
 
   return eid
 }
 
-export function createAnimation(world, frames, duration, first) {
+export function createAnimation(world, frames, duration, first, loop) {
   const eid = addEntity(world)
 
   addComponent(world, Animation, eid)
   Animation.frames[eid] = frames
   Animation.frameDuration[eid] = duration
   Animation.firstFrame[eid] = first || 0
+  Animation.loop[eid] = loop == undefined || loop ? 1 : 0
 
   return eid
 }
@@ -133,6 +150,7 @@ export function createPlayer(world, x, y) {
   Intent.speed[eid] = 1.5
   Intent.jumpStrength[eid] = 0.017
   Intent.dashStrength[eid] = 0.2
+  Intent.dashAudio[eid] = world.audioIDs.bark
   Intent.movement[eid] = 0
   Intent.jump[eid] = 0
   Intent.dash[eid] = 0

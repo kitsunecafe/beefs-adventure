@@ -7,11 +7,16 @@ export default () => {
   return world => {
     const currentFrame = world.time.elapsedFrames
 
-    query(world).forEach(id => {
+    const entities = query(world)
+    for (let i = 0; i < entities.length; i++) {
+      const id = entities[i]
       const aid = CurrentAnimation.id[id]
-      const frame = Math.floor((currentFrame / Animation.frameDuration[aid]) % Animation.frames[aid])
-      Sprite.frame[id] = Animation.firstFrame[aid] + frame
-    })
+
+      if (Animation.loop[aid] > 0 || Sprite.frame[id] - Animation.firstFrame[aid] < Animation.frames[aid] - 1) {
+        const frame = Math.floor(((currentFrame - CurrentAnimation.startFrame[id]) / Animation.frameDuration[aid]) % Animation.frames[aid])
+        Sprite.frame[id] = Animation.firstFrame[aid] + frame
+      }
+    }
 
     return world
   }

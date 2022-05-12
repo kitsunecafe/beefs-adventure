@@ -12,6 +12,9 @@ export class IntentProxy extends BaseProxy {
 	get dashStrength() { return this.store.dashStrength[this.eid] }
 	set dashStrength(val) { this.store.dashStrength[this.eid] = val }
 
+	get dashAudio() { return this.store.dashAudio[this.eid] }
+	set dashAudio(val) { this.store.dashAudio[this.eid] = val }
+
 	get movement() { return this.store.movement[this.eid] }
 	set movement(val) { this.store.movement[this.eid] = val }
 

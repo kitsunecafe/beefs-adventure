@@ -1,6 +1,7 @@
 import { defineComponent, Types } from 'https://esm.run/bitecs'
 
-export const Coin = defineComponent({
-	audio: Types.ui8
+export const Remove = defineComponent({
+	onFrame: Types.ui16
 })
+
 

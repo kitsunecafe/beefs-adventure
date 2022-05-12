@@ -6,4 +6,3 @@ export const Body = defineComponent({
 	grounded: Types.ui8,
 	facing: Types.i8
 })
-

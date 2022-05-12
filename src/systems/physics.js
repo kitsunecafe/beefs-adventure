@@ -1,4 +1,4 @@
-import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from 'https://esm.run/bitecs'
+import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from 'https://esm.run/bitecs'
 import Matter from 'https://esm.run/matter-js'
 import { Body, Collider, Contact, Dynamic, Intent, Sensor } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
@@ -18,7 +18,6 @@ export default () => {
 
 	const engine = Engine.create()
 	const physicsWorld = engine.world
-	// engine.gravity.y = 5
 
 	const detector = Detector.create()
 
@@ -26,8 +25,8 @@ export default () => {
 	const bodyAdded = enterQuery(bodyQuery)
 	const bodyRemoved = exitQuery(bodyQuery)
 
+	const contactQuery = defineQuery([Contact])
 	const dynamicQuery = defineQuery([Body, Collider, Dynamic])
-
 	const intentQuery = defineQuery([Intent])
 
 	const body = new BodyProxy(0)
@@ -41,6 +40,12 @@ export default () => {
 	const vector = Matter.Vector.create()
 	const force = Matter.Vector.create()
 	return world => {
+		const contacts = contactQuery(world)
+
+		for (let i = 0; i < contacts.length; i++) {
+			removeEntity(world, contacts[i])
+		}
+
 		const collisions = Detector.collisions(detector)
 
 		for (let i = 0; i < collisions.length; i++) {
@@ -90,13 +95,6 @@ export default () => {
 			const composite = composites.get(body.index)
 			position.x = composite.position.x
 			position.y = composite.position.y
-
-			// if (collisions.length > 0) {
-			// 	const ownCollisions = collisions.filter(col => col.bodyA.id == composite.id || col.bodyB.id == composite.id)
-			// 	body.grounded = ownCollisions.some(col => col.normal.y < -.9) ? 1 : 0
-			// } else {
-			// 	body.grounded = 0
-			// }
 		})
 
 		intentQuery(world).forEach(id => {

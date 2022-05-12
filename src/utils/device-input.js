@@ -32,20 +32,11 @@ export const Input = {
 	prevTimestamp: null,
 	key: new Array(8).fill(0).map(Key),
 	_keyboard: new Array(8).fill(0),
+
 	init() {
 		// Set up the keyboard events
 		document.addEventListener('keydown', function (e) { Input.changeKey(e.keyCode, 1) })
 		document.addEventListener('keyup', function (e) { Input.changeKey(e.keyCode, 0) })
-
-		const gamepadSupportAvailable = !!navigator.webkitGetGamepads || !!navigator.webkitGamepads
-
-		// if (gamepadSupportAvailable) {
-		// 	// Since Chrome only supports polling, we initiate polling loop straight
-		// 	// away. For Firefox, we will only do it if we get a connect event.
-		// 	if (!!navigator.webkitGamepads || !!navigator.webkitGetGamepads) {
-		// 		Input.startPolling()
-		// 	}
-		// }
 	},
 
 	// called on key up and key down events
@@ -70,44 +61,6 @@ export const Input = {
 		}
 	},
 
-	// startPolling() {
-	// 	// Don’t accidentally start a second loop, man.
-	// 	if (!Input.ticking) {
-	// 		Input.ticking = true
-	// 		Input.tick()
-	// 	}
-	// },
-
-	// /**
-	//  * Stops a polling loop by setting a flag which will prevent the next
-	//  * requestAnimationFrame() from being scheduled.
-	//  */
-	// stopPolling() {
-	// 	Input.ticking = false
-	// },
-
-	// /**
-	//  * A function called with each requestAnimationFrame(). Polls the gamepad
-	//  * status and schedules another poll.
-	//  */
-	// tick() {
-	// 	Input.pollStatus()
-	// 	Input.scheduleNextTick()
-	// },
-
-	// scheduleNextTick() {
-	// 	// Only schedule the next frame if we haven’t decided to stop via
-	// 	// stopPolling() before.
-	// 	if (Input.ticking) {
-	// 		requestAnimationFrame(Input.tick)
-	// 	}
-	// },
-
-	/**
-	 * Checks for the gamepad status. Monitors the necessary data and notices
-	 * the differences from previous state (buttons and connects/disconnects for Chrome). If differences are noticed, asks
-	 * to update the display accordingly. Should run as close to 60 frames per second as possible.
-	 */
 	tick() {
 		this.key.forEach(k => k.tick())
 

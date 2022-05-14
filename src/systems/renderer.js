@@ -1,5 +1,6 @@
-import { defineQuery, hasComponent } from 'https://esm.run/bitecs'
-import { Camera, Collider, Position, Sprite, SpriteSheet } from '../components/index.js'
+import { defineQuery } from 'https://esm.run/bitecs'
+import { Camera, Position, Sprite } from '../components/index.js'
+import { SpriteSheetProxy } from '../proxies/spritesheet.js'
 import { PositionProxy } from '../proxies/vector2.js'
 import { Vector2 } from '../utils/math.js'
 
@@ -8,6 +9,7 @@ export default (canvas) => {
   const cameraQuery = defineQuery([Position, Camera])
   const cameraPosition = new PositionProxy(0)
   const position = new PositionProxy(0)
+  const spriteSheet = new SpriteSheetProxy(0)
 
   let translation = new Vector2(0, 0)
   return world => {
@@ -38,9 +40,9 @@ export default (canvas) => {
 
       canvas.push()
 
-      const ssid = Sprite.spritesheet[id]
-      const tid = SpriteSheet.texture[ssid]
-      const halfWidth = SpriteSheet.frameWidth[ssid] / 2
+      spriteSheet.eid = Sprite.spritesheet[id]
+      const tid = spriteSheet.texture
+      const halfWidth = spriteSheet.frameWidth / 2
       const flipX = Sprite.scaleX[id] < 0
       const xOffset = flipX ? halfWidth : 0
 
@@ -48,21 +50,21 @@ export default (canvas) => {
       canvas.rot(Sprite.rotation[id])
       canvas.scale(Sprite.scaleX[id], Sprite.scaleY[id])
 
-      const x = (Sprite.frame[id] % SpriteSheet.columns[ssid]) * SpriteSheet.frameWidth[ssid] + SpriteSheet.offsetX[ssid]
-      const y = Math.floor(Sprite.frame[id] / SpriteSheet.columns[ssid]) * SpriteSheet.frameHeight[ssid] + SpriteSheet.offsetY[ssid]
+      const x = (Sprite.frame[id] % spriteSheet.columns) * spriteSheet.frameWidth + spriteSheet.offsetX
+      const y = Math.floor(Sprite.frame[id] / spriteSheet.columns) * spriteSheet.frameHeight + spriteSheet.offsetY
 
       const texture = world.textures[tid]
       const u0 = x / texture.width
       const v0 = y / texture.height
-      const u1 = u0 + (SpriteSheet.frameWidth[ssid] / texture.width)
-      const v1 = v0 + (SpriteSheet.frameHeight[ssid] / texture.height)
+      const u1 = u0 + (spriteSheet.frameWidth / texture.width)
+      const v1 = v0 + (spriteSheet.frameHeight / texture.height)
 
       canvas.img(
         texture,
         -xOffset,
         0,
-        SpriteSheet.frameWidth[ssid],
-        SpriteSheet.frameHeight[ssid],
+        spriteSheet.frameWidth,
+        spriteSheet.frameHeight,
         u0,
         v0,
         u1,

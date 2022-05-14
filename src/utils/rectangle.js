@@ -8,17 +8,22 @@ export class Point {
 export class Rectangle extends Point {
   constructor(x, y, w, h) {
     super(x, y)
+    this.update(x, y, w, h)
+  }
 
-    this.width = w
-    this.height = h
-    this.right = this.left + this.width
-    this.bottom = this.top + this.height
+  update(x, y, w, h) {
+    this.x = x
+    this.y = y
+    this.width = w || this.width
+    this.height = h || this.height
+    this.xMax = this.x + this.width
+    this.yMax = this.y + this.height
   }
 
   within(bounds) {
-    return bounds.left <= this.left &&
-      bounds.right >= this.right &&
-      bounds.top <= this.top &&
-      bounds.bottom >= this.bottom
+    return bounds.x <= this.x &&
+      bounds.xMax >= this.xMax &&
+      bounds.y <= this.y &&
+      bounds.xMax >= this.xMax
   }
 }

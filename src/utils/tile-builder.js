@@ -3,33 +3,6 @@ import { SpriteSheetProxy } from '../proxies/spritesheet.js'
 import { Body, Position, Sprite, SpriteSheet } from '../components/index.js'
 import { createCollider } from './constructors.js'
 
-const defaultSpriteSheetOptions = {
-  frameWidth: 16,
-  frameHeight: 16,
-  offsetX: 0,
-  offsetY: 0
-}
-
-const defaultSpriteOptions = {
-  rotation: 0,
-  scaleX: 1,
-  scaleY: 1
-}
-
-function createSpriteSheet(world, texture, options) {
-  const opts = Object.assign({}, defaultSpriteSheetOptions, options)
-  const eid = addEntity(world)
-
-  addComponent(world, SpriteSheet, eid)
-  SpriteSheet.texture[eid] = texture
-  SpriteSheet.frameWidth[eid] = opts.frameWidth
-  SpriteSheet.frameHeight[eid] = opts.frameHeight
-  SpriteSheet.offsetX[eid] = opts.offsetX
-  SpriteSheet.offsetY[eid] = opts.offsetY
-
-  return eid
-}
-
 function spriteCreator(world, spriteSheetId) {
   return createSprite.bind(null, world, spriteSheetId)
 }

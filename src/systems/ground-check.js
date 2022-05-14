@@ -3,7 +3,7 @@ import { Body, Contact, Dynamic } from '../components/index.js'
 import { BodyProxy } from '../proxies/body.js'
 import { ContactProxy } from '../proxies/contact.js'
 
-export default (normalLimit = -0.9) => {
+export default (normalLimit = 0.9) => {
 	const bodyQuery = defineQuery([Body])
 	const query = defineQuery([Contact])
 	const contact = new ContactProxy(0)
@@ -21,7 +21,7 @@ export default (normalLimit = -0.9) => {
 		for (let index = 0; index < contacts.length; index++) {
 			contact.eid = contacts[index]
 
-			if (contact.normalY > normalLimit) {
+			if (contact.normalY < normalLimit) {
 				continue
 			}
 

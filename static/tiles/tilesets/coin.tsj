@@ -1,0 +1,14 @@
+{ "columns":6,
+ "image":"..\/..\/image\/misc\/coin_anim.png",
+ "imageheight":16,
+ "imagewidth":48,
+ "margin":0,
+ "name":"coin",
+ "spacing":0,
+ "tilecount":12,
+ "tiledversion":"1.8.4",
+ "tileheight":8,
+ "tilewidth":8,
+ "type":"tileset",
+ "version":"1.8"
+}

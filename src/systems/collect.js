@@ -35,7 +35,7 @@ export default () => {
 			Sprite.frame[coin] = Animation.firstFrame[aid]
 
 			addComponent(world, Remove, coin)
-			Remove.onFrame[coin] = world.time.elapsedFrames + duration + 1000
+			Remove.onFrame[coin] = world.time.elapsedFrames + duration
 
 			createAudio(world, Coin.audio[coin])
 			removeComponent(world, Coin, coin)

@@ -1,7 +1,7 @@
 import { defineQuery, removeEntity } from 'https://esm.run/bitecs'
 import { Audio } from '../components/index.js'
 
-export default (context) => {
+export default () => {
 	const query = defineQuery([Audio])
 
 	return world => {
@@ -11,10 +11,9 @@ export default (context) => {
 			const id = entities[i]
 			const aid = Audio.id[id]
 
-
-			const source = context.createBufferSource()
+			const source = world.audioContext.createBufferSource()
 			source.buffer = world.audio[aid]
-			source.connect(context.destination)
+			source.connect(world.audioContext.destination)
 			source.start(0)
 			removeEntity(world, id)
 		}

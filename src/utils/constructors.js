@@ -63,10 +63,10 @@ export function createCamera(world, canvas, target) {
   addComponent(world, Camera, eid)
   Camera.following[eid] = target
 
-  Camera.width[eid] = canvas.width / 2
+  Camera.width[eid] = canvas.width / 1
   Camera.height[eid] = canvas.height / 2
 
-  Camera.deadzoneX[eid] = canvas.width / 4
+  Camera.deadzoneX[eid] = canvas.width / 3
   Camera.deadzoneY[eid] = canvas.height / 4
 
   return eid
@@ -192,6 +192,10 @@ export function createPlayer(world, spriteSheet) {
 
   return (x, y) => {
     const eid = createCollider(world, x, y, w, h)
+    console.log('placing player at',
+    Position.x[eid],
+    Position.y[eid]
+    )
 
     addComponent(world, Sprite, eid)
     Sprite.spritesheet[eid] = spriteSheet

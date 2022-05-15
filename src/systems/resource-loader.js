@@ -1,3 +1,5 @@
+import { addComponent, addEntity } from 'https://esm.run/bitecs'
+import { LoadLevel } from '../components/index.js'
 import { Actions } from '../utils/actions.js'
 import { loadBuffers } from '../utils/bufferloader.js'
 import Input from '../utils/device-input.js'
@@ -20,12 +22,18 @@ export default () => {
 
 		world.audioContext = new AudioContext()
 		const audio = await loadAudio(world.audioContext, audioSources)
-		const aKeys = Object.keys(audio)
 		world.audio = Object.values(audio)
-		world.audioIDs = zip(aKeys, range(world.audio.length))
+		world.audioIDs = zip(
+			Object.keys(audio),
+			range(world.audio.length)
+		)
 
 		// Input
 		world.actions = Actions(Input)
+
+		const eid = addEntity(world)
+		addComponent(world, LoadLevel, eid)
+		LoadLevel.id[eid] = 0
 
 		return world
 	}

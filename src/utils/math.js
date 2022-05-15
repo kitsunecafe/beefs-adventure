@@ -94,3 +94,9 @@ Vector2.prototype = {
 	}
 }
 
+export const toCartesian = (w, h) => {
+	const hw = w / 2
+	const hh = h / 2
+
+	return (x, y) => ([x + hw, y + hh])
+}

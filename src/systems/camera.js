@@ -11,12 +11,12 @@ export default () => {
 	const target = new PositionProxy(0)
 	const camera = new CameraProxy(0)
 	const viewport = new Rectangle(0, 0, 0, 0)
-	let index = 0
 
 	return world => {
-		query(world).forEach(id => {
+		const entities = query(world)
+		for (let index = 0; index < entities.length; index++) {
+			const id = entities[index]
 			position.eid = camera.eid = id
-
 
 			if (camera.following) {
 				target.eid = camera.following
@@ -36,6 +36,7 @@ export default () => {
 
 			viewport.update(position.x, position.y, camera.width, camera.height)
 
+			// if (!viewport.within(world.bounds)) {
 			if (viewport.x < world.bounds.x) {
 				position.x = world.bounds.x
 			}
@@ -51,7 +52,11 @@ export default () => {
 			if (viewport.yMax > world.bounds.yMax) {
 				position.y = world.bounds.yMax - camera.height
 			}
-		})
+			// }
+
+			// console.log('camera moving to', position.x, position.y)
+
+		}
 
 		return world
 	}

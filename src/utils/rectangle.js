@@ -26,4 +26,11 @@ export class Rectangle extends Point {
       bounds.y <= this.y &&
       bounds.xMax >= this.xMax
   }
+
+  intersects(bounds) {
+    return this.x < bounds.xMax &&
+      this.xMax < bounds.x &&
+      this.y < bounds.yMax &&
+      this.yMax < bounds.y
+  }
 }

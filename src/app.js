@@ -1,4 +1,4 @@
-import { createWorld, pipe } from 'https://esm.run/bitecs'
+import { createWorld } from 'https://esm.run/bitecs'
 
 import animationSystem from './systems/animation.js'
 import spritesheetSystem from './systems/spritesheet.js'
@@ -15,13 +15,12 @@ import groundCheckSystem from './systems/ground-check.js'
 import removalSystem from './systems/removal.js'
 import checkpointSystem from './systems/checkpoint.js'
 import respawnSystem from './systems/respawn.js'
-
-import raf from './utils/raf.js'
 import resourceLoader from './systems/resource-loader.js'
 import levelLoader from './systems/level-loader.js'
 
-// TODO Checkpoints, death, respawn
-// Death boxes could just be a sensor + new component & system like Coin?
+import raf from './utils/raf.js'
+import { pipe } from './utils/helpers.js'
+
 async function create() {
   const canvas = TC(document.querySelector('main canvas'))
   canvas.bkg(0.2, 0.25, 0.25)
@@ -29,15 +28,16 @@ async function create() {
   const world = createWorld()
   world.time = { delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
+  world.levels = ['level-1.tmj', 'level-2.tmj']
 
   const state = {
     canvas,
     world,
-    startSystems: async (world) => {
-      await resourceLoader()(world),
-      await levelLoader(canvas, 'level-1.tmj')(world)
-    },
+    startSystems: pipe(
+      resourceLoader(),
+    ),
     updateSystems: pipe(
+      levelLoader(canvas),
       statsSystem(),
       inputSystem(),
       spritesheetSystem(),
@@ -46,7 +46,7 @@ async function create() {
       checkpointSystem(),
       respawnSystem(),
       physicsSystem(),
-      groundCheckSystem()
+      groundCheckSystem(),
     ),
     renderSystems: pipe(
       audioSystem(world.audioContext),

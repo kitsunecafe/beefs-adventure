@@ -9,3 +9,5 @@ export async function load(src) {
 
 export const zip = (a, b) => Object.fromEntries(a.map((e, i) => ([e, b[i]])))
 export const range = n => ([...Array(n).keys()])
+export const pipe = (...functions) => input => functions.reduce((chain, func) => chain.then(func), Promise.resolve(input));
+

@@ -1,4 +1,4 @@
-import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from 'https://esm.run/bitecs'
+import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from '/static/js/bitecs.mjs'
 import Matter from 'https://esm.run/matter-js'
 import { Body, Collider, Contact, Dynamic, Intent, Translate, Position, Sensor } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'

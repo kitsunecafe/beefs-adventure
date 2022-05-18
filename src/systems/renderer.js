@@ -1,6 +1,6 @@
 // https://stackoverflow.com/questions/27462949/convert-position-coordinates-to-canvas-coordinates
 // https://stackoverflow.com/questions/54444944/convert-html-canvas-coordinate-system-to-cartesian-system
-import { defineQuery } from 'https://esm.run/bitecs'
+import { defineQuery } from '/static/js/bitecs.mjs'
 import { Camera, Position, Sprite } from '../components/index.js'
 import { CameraProxy } from '../proxies/camera.js'
 import { SpriteSheetProxy } from '../proxies/spritesheet.js'

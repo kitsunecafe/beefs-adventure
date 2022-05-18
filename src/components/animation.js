@@ -1,4 +1,4 @@
-import { defineComponent, Types } from 'https://esm.run/bitecs'
+import { defineComponent, Types } from '/static/js/bitecs.mjs'
 
 export const Animation = defineComponent({
 	id: Types.ui8,

@@ -1,4 +1,4 @@
-import { defineQuery, hasComponent } from 'https://esm.run/bitecs'
+import { defineQuery, hasComponent } from '/static/js/bitecs.mjs'
 import { Body, Contact, Dynamic } from '../components/index.js'
 import { BodyProxy } from '../proxies/body.js'
 import { ContactProxy } from '../proxies/contact.js'
@@ -33,6 +33,8 @@ export default (normalLimit = 0.9) => {
 				Body.grounded[contact.b] = 1
 			}
 		}
+
+		return world
 	}
 }
 

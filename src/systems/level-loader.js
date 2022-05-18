@@ -1,9 +1,10 @@
-import { defineQuery, removeEntity } from 'https://esm.run/bitecs'
-import { getMapAssets, loadMap, parseMap } from '../utils/tiled-parser.js'
-import { createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createPlayer, createSprite, createSpriteSheet } from '../utils/constructors.js'
-import { load, range, zip } from '../utils/helpers.js'
+import { defineQuery, getAllEntities, removeEntity } from '/static/js/bitecs.mjs'
+import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap } from '../utils/tiled-parser.js'
+import { createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createPlayer, createSprite, createSpriteSheet, createWarp } from '../utils/constructors.js'
+import { load, map, mapObj, pipe, range, zip } from '../utils/helpers.js'
 import { Rectangle } from '../utils/rectangle.js'
-import { LoadLevel, Position } from '../components/index.js'
+import { LoadLevel, SpriteSheet } from '../components/index.js'
+import { hexToRGB } from '../utils/color.js'
 
 const loadImages = map => {
 	const keys = Object.keys(map)
@@ -11,62 +12,102 @@ const loadImages = map => {
 	return Promise.all(Object.values(map).map(load)).then(zip.bind(null, keys))
 }
 
-const loadLevel = canvas => async (world, level) => {
-	const gl = canvas.g
-	const map = await parseMap(level)
-	const pixelWidth = map.width * 16
-	const pixelHeight = map.height * 16
-	world.bounds = new Rectangle(-(pixelWidth / 4), -(pixelHeight / 4), pixelWidth, pixelHeight)
-	const imageSources = getMapAssets(map)
+const removeAllEntities = world => {
+	const entities = getAllEntities(world)
+	for (let i = 0; i < entities.length; i++) {
+		const id = entities[i]
+		removeEntity(world, id)
+	}
+}
 
-	const images = await loadImages(imageSources)
+const loadLevel = canvas => async (world, level) => {
+	removeAllEntities(world)
+
+	// const color = hexToRGB('338fd5')
+	// canvas.bkg(...color)
+	const gl = canvas.g
+	const reqMap = await parseMap(level)
+	const pixelWidth = reqMap.width * reqMap.tileWidth
+	const pixelHeight = reqMap.height * reqMap.tileHeight
+	world.bounds = new Rectangle(0, 0, pixelWidth, pixelHeight)
+
+	if (reqMap.backgroundColor) {
+		canvas.bkg(...hexToRGB(reqMap.backgroundColor))
+	}
+
+	const tileSetImageSources = getTileSetImageSources(reqMap)
+	const imageLayerSources = getImageLayerSources(reqMap)
+
+	const tileSetImages = await loadImages(tileSetImageSources)
+	const layerImages = await loadImages(imageLayerSources)
+
+	const images = Object.assign({}, tileSetImages, layerImages)
 	const keys = Object.keys(images)
+
 	world.textures = Object.values(images).map(img => TCTex(gl, img, img.width, img.height))
 	world.textureIDs = zip(keys, range(world.textures.length))
 
-	map.tileSets.forEach(ts => {
-		ts.eid = createSpriteSheet(world, world.textureIDs[ts.name], {
-			frameWidth: ts.tileWidth,
-			frameHeight: ts.tileHeight
-		})
-	})
+	const tileSetSpriteSheets = pipe(
+		map(ts => ([
+			ts.name,
+			createSpriteSheet(world, world.textureIDs[ts.name], {
+				frameWidth: ts.tileWidth,
+				frameHeight: ts.tileHeight
+			})
+		])),
+		Object.fromEntries
+	)(reqMap.tileSets)
+
+	const imageSpriteSheets = mapObj(
+		([name, image]) => ([
+			name,
+			createSpriteSheet(world, world.textureIDs[name], {
+				frameWidth: image.width,
+				frameHeight: image.height
+			})
+		])
+	)(layerImages)
+
+	const spriteSheets = Object.assign({}, tileSetSpriteSheets, imageSpriteSheets)
 
 	const getSpriteSheet = id => {
-		return map.tileSets.find(ts => id >= ts.firstgid && id <= ts.lastgid)
+		return reqMap.tileSets.find(ts => id >= ts.firstgid && id <= ts.lastgid)
 	}
 
 	let coinFactory
 
 	loadMap(
-		map,
+		reqMap,
 		(tile, position) => {
 			if (!tile) return
+
 			const spriteSheet = getSpriteSheet(tile)
 			if (!spriteSheet) return
-			createSprite(
+			const sseid = spriteSheets[spriteSheet.name]
+
+			const eid = createSprite(
 				world,
-				spriteSheet.eid,
+				sseid,
 				tile - spriteSheet.firstgid,
 				(position.x * spriteSheet.tileWidth) + (spriteSheet.tileWidth / 2),
 				(position.y * spriteSheet.tileHeight) + (spriteSheet.tileHeight / 2),
-				0, // rotation
-				0, // scaleX
-				0 // scaleY
 			)
 		},
 		(obj) => {
 			const spriteSheet = getSpriteSheet(obj.gid)
+
 			if (obj.type === 'playerSpawn') {
-				const eid = createPlayer(world, spriteSheet.eid)(
+				const sseid = spriteSheets[spriteSheet.name]
+				const eid = createPlayer(world, sseid)(
 					obj.x,
 					obj.y
 				)
 
-
 				createCamera(world, canvas.c, eid)
 			} else if (obj.type === 'coin') {
+				const sseid = spriteSheets[spriteSheet.name]
 				if (!coinFactory) {
-					coinFactory = createCoin(world, spriteSheet.eid)
+					coinFactory = createCoin(world, sseid)
 				}
 
 				coinFactory(obj.x, obj.y)
@@ -76,11 +117,37 @@ const loadLevel = canvas => async (world, level) => {
 				createCheckpoint(world, obj.x, obj.y, obj.width, obj.height)
 			} else if (obj.type === 'damageZone') {
 				createDamageZone(world, obj.x, obj.y, obj.width, obj.height)
+			} else if (obj.type === 'warp') {
+				const level = obj.properties.find(prop => prop.name === 'level').value
+				console.log('WARP TO', level)
+				const eid = createWarp(world, obj.x, obj.y, obj.width, obj.height, level)
+			}
+		},
+		img => {
+			const spriteSheet = spriteSheets[img.name]
+
+			const width = SpriteSheet.frameWidth[spriteSheet]
+			const height = SpriteSheet.frameHeight[spriteSheet]
+
+			const countx = img.repeatx ? reqMap.width * reqMap.tileWidth / width : 1
+			const county = img.repeaty ? reqMap.height * reqMap.tileHeight / height : 1
+
+			const sx = img.offsetx + img.x - reqMap.tileWidth
+			const sy = img.offsety + img.y - reqMap.tileHeight
+
+			for (let y = 0; y < county; y++) {
+				for (let x = 0; x < countx; x++) {
+					createSprite(
+						world,
+						spriteSheets[img.name],
+						0,
+						sx + (width * x),
+						sy + (height * y)
+					)
+				}
 			}
 		}
 	)
-
-	console.log('loaded', level)
 }
 
 export default (canvas) => {

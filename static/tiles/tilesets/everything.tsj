@@ -1,0 +1,14 @@
+{ "columns":34,
+ "image":"..\/..\/image\/Premium Platformer Asset Pack\/EVERYTHING\/EVERYTHING.png",
+ "imageheight":768,
+ "imagewidth":544,
+ "margin":0,
+ "name":"EVERYTHING",
+ "spacing":0,
+ "tilecount":1632,
+ "tiledversion":"1.8.4",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.8"
+}

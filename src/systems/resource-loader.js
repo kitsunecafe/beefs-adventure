@@ -1,4 +1,4 @@
-import { addComponent, addEntity } from 'https://esm.run/bitecs'
+import { addComponent, addEntity } from '/static/js/bitecs.mjs'
 import { LoadLevel } from '../components/index.js'
 import { Actions } from '../utils/actions.js'
 import { loadBuffers } from '../utils/bufferloader.js'

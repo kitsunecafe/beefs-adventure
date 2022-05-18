@@ -1,5 +1,5 @@
 // https://jsfiddle.net/gfcarv/QKgHs/
-import { defineQuery } from 'https://esm.run/bitecs'
+import { defineQuery } from '/static/js/bitecs.mjs'
 import { Camera, Position } from '../components/index.js'
 import { CameraProxy } from '../proxies/camera.js'
 import { PositionProxy } from '../proxies/vector2.js'
@@ -37,11 +37,12 @@ export default () => {
 			viewport.update(position.x, position.y, camera.width, camera.height)
 
 			// if (!viewport.within(world.bounds)) {
-			if (viewport.x < world.bounds.x) {
+			if ((viewport.x) < world.bounds.x) {
 				position.x = world.bounds.x
 			}
 
 			if (viewport.y < world.bounds.y) {
+				console.log('ymin')
 				position.y = world.bounds.y
 			}
 
@@ -50,12 +51,10 @@ export default () => {
 			}
 
 			if (viewport.yMax > world.bounds.yMax) {
+				console.log(viewport, world.bounds)
 				position.y = world.bounds.yMax - camera.height
 			}
 			// }
-
-			// console.log('camera moving to', position.x, position.y)
-
 		}
 
 		return world

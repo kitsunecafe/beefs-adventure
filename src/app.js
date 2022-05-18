@@ -1,4 +1,4 @@
-import { createWorld } from 'https://esm.run/bitecs'
+import { createWorld } from '/static/js/bitecs.mjs'
 
 import animationSystem from './systems/animation.js'
 import spritesheetSystem from './systems/spritesheet.js'
@@ -12,6 +12,7 @@ import physicsSystem from './systems/physics.js'
 import statsSystem from './systems/stats.js'
 import collectSystem from './systems/collect.js'
 import groundCheckSystem from './systems/ground-check.js'
+import warpSystem from './systems/warp.js'
 import removalSystem from './systems/removal.js'
 import checkpointSystem from './systems/checkpoint.js'
 import respawnSystem from './systems/respawn.js'
@@ -19,16 +20,15 @@ import resourceLoader from './systems/resource-loader.js'
 import levelLoader from './systems/level-loader.js'
 
 import raf from './utils/raf.js'
-import { pipe } from './utils/helpers.js'
+import { pipeAsync as pipe } from './utils/helpers.js'
 
 async function create() {
   const canvas = TC(document.querySelector('main canvas'))
-  canvas.bkg(0.2, 0.25, 0.25)
 
   const world = createWorld()
   world.time = { delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
-  world.levels = ['level-1.tmj', 'level-2.tmj']
+  world.levels = ['level-1.tmj', 'level-2.tmj', 'level-3.tmj']
 
   const state = {
     canvas,
@@ -47,6 +47,7 @@ async function create() {
       respawnSystem(),
       physicsSystem(),
       groundCheckSystem(),
+      warpSystem()
     ),
     renderSystems: pipe(
       audioSystem(world.audioContext),

@@ -1,4 +1,4 @@
-import { defineQuery, removeEntity } from 'https://esm.run/bitecs'
+import { defineQuery, removeEntity } from '/static/js/bitecs.mjs'
 import { Audio } from '../components/index.js'
 
 export default () => {

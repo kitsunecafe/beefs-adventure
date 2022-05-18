@@ -1,4 +1,4 @@
-import { addComponent, addEntity } from 'https://esm.run/bitecs'
+import { addComponent, addEntity } from '/static/js/bitecs.mjs'
 import {
   Animation,
   Audio,
@@ -14,12 +14,14 @@ import {
   EntityAnimation,
   Intent,
   LastCheckpoint,
+  Player,
   Position,
   ReceivesInput,
   Sensor,
   Sprite,
   SpriteSheet,
-  Purse
+  Purse,
+  Warp
 } from '../components/index.js'
 
 export const addPosition = (world, x, y) => id => {
@@ -63,8 +65,8 @@ export function createCamera(world, canvas, target) {
   addComponent(world, Camera, eid)
   Camera.following[eid] = target
 
-  Camera.width[eid] = canvas.width / 1
-  Camera.height[eid] = canvas.height / 2
+  Camera.width[eid] = canvas.width / 1 
+  Camera.height[eid] = canvas.height / 1.49
 
   Camera.deadzoneX[eid] = canvas.width / 3
   Camera.deadzoneY[eid] = canvas.height / 4
@@ -92,8 +94,6 @@ export function createAnimation(world, frames, duration, first, loop) {
 }
 
 const defaultSpriteSheetOptions = {
-  frameWidth: 16,
-  frameHeight: 16,
   offsetX: 0,
   offsetY: 0
 }
@@ -123,8 +123,8 @@ export function createSprite(world, spriteSheet, tile, x, y, options) {
 
   const eid = addEntity(world)
   addComponent(world, Position, eid)
-  Position.x[eid] = x
-  Position.y[eid] = y
+  Position.x[eid] = x - (SpriteSheet.frameWidth[eid] / 2)
+  Position.y[eid] = y - (SpriteSheet.frameHeight[eid] / 2)
 
   addComponent(world, Body, eid)
   Body.mass[eid] = 1
@@ -149,6 +149,20 @@ export function createDamageZone(world, x, y, w, h) {
   const eid = createCollider(world, x, y, w, h)
   addComponent(world, DamageZone, eid)
   addComponent(world, Sensor, eid)
+}
+
+export function createWarp(world, x, y, w, h, level) {
+  const levelID = world.levels.findIndex(name => name === level)
+
+  if (levelID >= 0) {
+    const eid = createCollider(world, x, y, w, h)
+    addComponent(world, Warp, eid)
+    Warp.id[eid] = levelID
+    addComponent(world, Sensor, eid)
+    return eid
+  }
+
+  return -1
 }
 
 export function createCoin(world, spriteSheet) {
@@ -191,11 +205,7 @@ export function createPlayer(world, spriteSheet) {
   const h = SpriteSheet.frameHeight[spriteSheet]
 
   return (x, y) => {
-    const eid = createCollider(world, x, y, w, h)
-    console.log('placing player at',
-    Position.x[eid],
-    Position.y[eid]
-    )
+    const eid = createCollider(world, x - (w / 2), y - (h / 2), w, h)
 
     addComponent(world, Sprite, eid)
     Sprite.spritesheet[eid] = spriteSheet
@@ -222,6 +232,7 @@ export function createPlayer(world, spriteSheet) {
 
     addComponent(world, ReceivesInput, eid)
     addComponent(world, Dynamic, eid)
+    addComponent(world, Player, eid)
     addComponent(world, Purse, eid)
     addComponent(world, LastCheckpoint, eid)
 

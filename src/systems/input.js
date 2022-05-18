@@ -1,4 +1,4 @@
-import { defineQuery } from 'https://esm.run/bitecs'
+import { defineQuery } from '/static/js/bitecs.mjs'
 import { Body, Intent, ReceivesInput } from '../components/index.js'
 import { BodyProxy } from '../proxies/body.js'
 import { IntentProxy } from "../proxies/intent.js"

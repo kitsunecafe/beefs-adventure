@@ -1,4 +1,4 @@
-import { addComponent } from 'https://esm.run/bitecs'
+import { addComponent } from '/static/js/bitecs.mjs'
 
 export class BaseProxy {
 	constructor(store, eid) {

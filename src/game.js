@@ -1,1 +1,1 @@
-import { createWorld, addEntity } from 'https://esm.run/bitecs'
+import { createWorld, addEntity } from '/static/js/bitecs.mjs'

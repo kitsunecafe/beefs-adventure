@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, hasComponent, removeComponent, removeEntity } from 'https://esm.run/bitecs'
+import { addComponent, defineQuery, hasComponent, removeComponent, removeEntity } from '/static/js/bitecs.mjs'
 import { Animation, Coin, CoinAnimation, CurrentAnimation, Contact, Remove, Purse, Sprite } from '../components/index.js'
 import { ContactProxy } from '../proxies/contact.js'
 import { createAudio } from '../utils/constructors.js'

@@ -1,4 +1,4 @@
-import { defineQuery } from 'https://esm.run/bitecs'
+import { defineQuery } from '/static/js/bitecs.mjs'
 import { Collider } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { PositionProxy } from '../proxies/vector2.js'

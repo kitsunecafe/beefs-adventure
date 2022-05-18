@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery } from 'https://esm.run/bitecs'
+import { defineQuery, enterQuery } from '/static/js/bitecs.mjs'
 import { SpriteSheet, Texture } from '../components/index.js'
 
 export default () => {

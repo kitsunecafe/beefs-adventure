@@ -1,3 +1,3 @@
-import { defineComponent } from 'https://esm.run/bitecs'
+import { defineComponent } from '/static/js/bitecs.mjs'
 
 export const Checkpoint = defineComponent()

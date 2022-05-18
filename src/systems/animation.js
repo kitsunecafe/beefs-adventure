@@ -1,4 +1,4 @@
-import { defineQuery } from 'https://esm.run/bitecs'
+import { defineQuery } from '/static/js/bitecs.mjs'
 import { Animation, CurrentAnimation, Sprite } from '../components/index.js'
 
 export default () => {

@@ -1,6 +1,16 @@
+import { map, pipe } from './helpers.js'
 import { match } from './match.js'
-const json = url => fetch(url).then(res => res.json())
 
+const LayerName = Object.freeze({
+	TileLayer: 'tilelayer',
+	ObjectGroup: 'objectgroup',
+	ImageLayer: 'imagelayer'
+})
+
+const json = url => fetch(url).then(res => res.json())
+const eq = b => a => a === b
+const eqType = b => a => eq(b)(a.type)
+const id = x => x
 const base = new URL(`${window.location.origin}/static/tiles/maps/`)
 
 export const parseMap = src => {
@@ -12,10 +22,11 @@ export const parseMap = src => {
 				height,
 				tilewidth: tileWidth,
 				tileheight: tileHeight,
-				layers
+				layers,
+				properties
 			} = res
 
-			const tileSets = await Promise.all(res.tilesets.map(parseTileSet))
+			const tileSets = await Promise.all(res.tilesets.map(loadTileSet))
 
 			return {
 				width,
@@ -23,16 +34,30 @@ export const parseMap = src => {
 				tileWidth,
 				tileHeight,
 				layers,
-				tileSets
+				tileSets,
+				...parseCustomProperties(properties)
 			}
 		})
 }
 
-export const getMapAssets = map => (
-	Object.fromEntries(map.tileSets.map(ts => ([ts.name, ts.source])))
+const parseCustomProperties = pipe(
+	map(prop => ([prop.name, prop.value])),
+	Object.fromEntries
 )
 
-export const parseTileSet = ({ firstgid, source }) => {
+export const getTileSetImageSources = map => (
+	Object.fromEntries(map.tileSets.map(ts => ([ts.name, new URL(ts.source, base)])))
+)
+
+export const getImageLayerSources = map => (
+	Object.fromEntries(
+		map.layers
+			.filter(eqType(LayerName.ImageLayer))
+			.map(l => ([l.name, new URL(l.image, base)]))
+	)
+)
+
+export const loadTileSet = ({ firstgid, source }) => {
 	const url = new URL(source, base)
 	return json(url)
 		.then(createTileSet)
@@ -72,17 +97,15 @@ export const createTileSet = json => {
 	}
 }
 
-export const loadMap = (map, tileCallback, objectCallback) => {
-	map.layers.forEach(loadLayer(tileCallback, objectCallback))
+export const loadMap = (map, tileCallback, objectCallback, imageCallback) => {
+	map.layers.forEach(loadLayer(tileCallback, objectCallback, imageCallback))
 }
 
-const eqType = b => a => a.type === b
-const id = x => x
-
-const loadLayer = (tcb, ocb) => layer => {
+const loadLayer = (tcb, ocb, icb) => layer => {
 	match(layer)
-		.on(eqType('tilelayer'), loadTileLayer(tcb))
-		.on(eqType('objectgroup'), loadObjectLayer(ocb))
+		.on(eqType(LayerName.TileLayer), loadTileLayer(tcb))
+		.on(eqType(LayerName.ObjectGroup), loadObjectLayer(ocb))
+		.on(eqType(LayerName.ImageLayer), loadImageLayer(icb))
 		.otherwise(id(false))
 }
 
@@ -107,4 +130,8 @@ const loadObjectLayer = cb => layer => {
 		...offset({ x, y }),
 		...obj
 	}))
+}
+
+const loadImageLayer = cb => layer => {
+	cb(layer)
 }

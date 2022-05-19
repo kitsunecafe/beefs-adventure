@@ -5,7 +5,7 @@ export default () => {
   const query = defineQuery([Sprite, CurrentAnimation])
 
   return world => {
-    const currentFrame = world.time.elapsedFrames
+    const elapsed = world.time.elapsed * 1000
 
     const entities = query(world)
     for (let i = 0; i < entities.length; i++) {
@@ -13,7 +13,8 @@ export default () => {
       const aid = CurrentAnimation.id[id]
 
       if (Animation.loop[aid] > 0 || Sprite.frame[id] - Animation.firstFrame[aid] < Animation.frames[aid] - 1) {
-        const frame = Math.floor(((currentFrame - CurrentAnimation.startFrame[id]) / Animation.frameDuration[aid]) % Animation.frames[aid])
+        const currentFrame = Math.floor(elapsed / Animation.frameDuration[aid])
+        const frame = Math.floor((currentFrame - CurrentAnimation.startFrame[id]) % Animation.frames[aid])
         Sprite.frame[id] = Animation.firstFrame[aid] + frame
       }
     }

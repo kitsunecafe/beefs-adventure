@@ -26,7 +26,7 @@ async function create() {
   const canvas = TC(document.querySelector('main canvas'))
 
   const world = createWorld()
-  world.time = { delta: 0, elapsed: 0, elapsedFrames: 0 }
+  world.time = { fixedDelta: 0, delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
   world.levels = ['level-1.tmj', 'level-2.tmj', 'level-3.tmj']
 
@@ -65,13 +65,15 @@ async function create() {
 }
 
 function update(state, dt) {
-  state.world.time.delta = dt
-  state.world.time.elapsed += dt
+  state.world.time.fixedDelta = dt
+  state.world.time.fixedElapsed += dt
 
   state.updateSystems(state.world)
 }
 
 function render(state, dt) {
+  state.world.time.delta = dt
+  state.world.time.elapsed += dt
   state.world.time.elapsedFrames++
 
   state.renderSystems(state.world)

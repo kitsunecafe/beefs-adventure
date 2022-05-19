@@ -7,6 +7,7 @@ export async function load(src) {
 	})
 }
 
+export const identity = x => x
 export const zip = (a, b) => Object.fromEntries(a.map((e, i) => ([e, b[i]])))
 export const range = n => ([...Array(n).keys()])
 export const compose = (...functions) => input => functions.reduceRight((value, func) => func(value), input)
@@ -22,6 +23,8 @@ export const tap = fn => val => {
 	return val
 }
 
+export const flat = depth => iter => isNull(iter) ? [] : iter.flat(depth)
+export const filter = fn => iter => isNull(iter) ? [] : iter.filter(fn)
 export const map = fn => iter => isNull(iter) ? [] : iter.map(fn)
 export const mapObj = fn => pipe(
 	Object.entries,
@@ -29,4 +32,5 @@ export const mapObj = fn => pipe(
 	Object.fromEntries
 )
 
-export const prop = key => obj => obj[prop]
+export const prop = key => obj => obj[key]
+export const hasProp = key => obj => obj && obj.hasOwnProperty(key)

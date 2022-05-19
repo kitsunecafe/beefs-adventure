@@ -1,24 +1,27 @@
 import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from '/static/js/bitecs.mjs'
 import Matter from 'https://esm.run/matter-js'
-import { Body, Collider, Contact, Dynamic, Intent, Translate, Position, Sensor } from '../components/index.js'
+import { Body, Collider, Contact, Dynamic, Intent, Translate, Player, Position, Sensor } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { BodyProxy } from '../proxies/body.js'
 import { PositionProxy } from '../proxies/vector2.js'
 import { IntentProxy } from "../proxies/intent.js"
 import Store from '../utils/store.js'
 import { ContactProxy } from '../proxies/contact.js'
+import { identity } from '../utils/helpers.js'
 
 const Bodies = Matter.Bodies
 const Composite = Matter.Composite
 const Detector = Matter.Detector
 const Engine = Matter.Engine
+const Query = Matter.Query
+const Vector = Matter.Vector
 
+// https://github.com/liabru/matter-js/issues/5
 export default () => {
 	const composites = new Store(128)
 
 	const engine = Engine.create()
 	const physicsWorld = engine.world
-	// physicsWorld.gravity.y = 0
 
 	const detector = Detector.create()
 
@@ -39,8 +42,8 @@ export default () => {
 
 	let options = { isStatic: false, friction: 0, isSensor: 0 }
 
-	const vector = Matter.Vector.create()
-	const force = Matter.Vector.create()
+	const vector = Vector.create()
+	const force = Vector.create()
 	return world => {
 		const contacts = contactQuery(world)
 
@@ -69,7 +72,7 @@ export default () => {
 			Composite.remove(physicsWorld, composite)
 
 			Detector.clear(detector)
-			Detector.setBodies(detector, composites.items.filter(x => x))
+			Detector.setBodies(detector, composites.items.filter(identity))
 		})
 
 		bodyAdded(world).forEach(id => {
@@ -84,12 +87,18 @@ export default () => {
 			Matter.Body.scale(composite, 1, 1)
 			composite.eid = id
 
+			if (hasComponent(world, Player, id)) {
+				composite.label = 'Player'
+			}
+
 			body.index = composites.add(composite)
 			Composite.add(physicsWorld, composite)
 
 			Detector.clear(detector)
-			Detector.setBodies(detector, composites.items.filter(x => x))
+			Detector.setBodies(detector, composites.items.filter(identity))
 		})
+
+		const bodies = composites.items.filter(identity)
 
 		translationQuery(world).forEach(id => {
 			position.eid = id
@@ -112,7 +121,7 @@ export default () => {
 		})
 
 		intentQuery(world).forEach(id => {
-			intent.eid = body.eid = position.eid = id
+			intent.eid = body.eid = collider.eid = position.eid = id
 
 			const composite = composites.get(body.index)
 			force.x = intent.movement
@@ -137,11 +146,32 @@ export default () => {
 				force.x = intent.dash * body.facing
 				force.y = 0
 
-				Matter.Body.applyForce(composite, vector, force)
+				const end = Vector.add(vector, Vector.mult(force, 100))
+				const collisions = Query.ray(
+					bodies,
+					vector,
+					end
+				)
+					.filter(col => col.body.id !== composite.id && !col.body.isSensor)
+
+				let dashPosition = end
+
+				if (collisions.length > 0) {
+					const collision = collisions.map(col => col.body).reduce((prev, cur) => (
+						Math.abs(cur.position.x - vector.x) < Math.abs(prev.position.x - vector.x) ? cur : prev
+					))
+
+					const bounds = body.facing > 0 ? collision.bounds.min : collision.bounds.max
+					const halfWidth = composite.bounds.max.x - composite.bounds.min.x
+					dashPosition.x = bounds.x
+				}
+
+				Matter.Body.setPosition(composite, dashPosition)
+				// Matter.Body.applyForce(composite, vector, force)
 			}
 		})
 
-		Engine.update(engine, world.delta)
+		Engine.update(engine, world.time.fixedDelta * 1000)
 		return world
 	}
 }

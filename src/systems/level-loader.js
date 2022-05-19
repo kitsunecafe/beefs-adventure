@@ -1,9 +1,9 @@
-import { defineQuery, getAllEntities, removeEntity } from '/static/js/bitecs.mjs'
-import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap } from '../utils/tiled-parser.js'
-import { createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createPlayer, createSprite, createSpriteSheet, createWarp } from '../utils/constructors.js'
-import { load, map, mapObj, pipe, range, zip } from '../utils/helpers.js'
+import { addComponent, defineQuery, getAllEntities, removeEntity } from '/static/js/bitecs.mjs'
+import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap, parseAnimations, clearFlags } from '../utils/tiled-parser.js'
+import { createAnimation, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createPlayer, createSprite, createSpriteSheet, createWarp } from '../utils/constructors.js'
+import { hasProp, prop, load, map, mapObj, pipe, range, zip } from '../utils/helpers.js'
 import { Rectangle } from '../utils/rectangle.js'
-import { LoadLevel, SpriteSheet } from '../components/index.js'
+import { CurrentAnimation, LoadLevel, SpriteSheet } from '../components/index.js'
 import { hexToRGB } from '../utils/color.js'
 
 const loadImages = map => {
@@ -23,8 +23,6 @@ const removeAllEntities = world => {
 const loadLevel = canvas => async (world, level) => {
 	removeAllEntities(world)
 
-	// const color = hexToRGB('338fd5')
-	// canvas.bkg(...color)
 	const gl = canvas.g
 	const reqMap = await parseMap(level)
 	const pixelWidth = reqMap.width * reqMap.tileWidth
@@ -32,7 +30,8 @@ const loadLevel = canvas => async (world, level) => {
 	world.bounds = new Rectangle(0, 0, pixelWidth, pixelHeight)
 
 	if (reqMap.backgroundColor) {
-		canvas.bkg(...hexToRGB(reqMap.backgroundColor))
+		const color = hexToRGB(reqMap.backgroundColor)
+		canvas.bkg(...color)
 	}
 
 	const tileSetImageSources = getTileSetImageSources(reqMap)
@@ -69,6 +68,17 @@ const loadLevel = canvas => async (world, level) => {
 	)(layerImages)
 
 	const spriteSheets = Object.assign({}, tileSetSpriteSheets, imageSpriteSheets)
+	const animations = pipe(
+		parseAnimations,
+		map(anim => ({
+			...anim,
+			eid: createAnimation(world, anim.length, anim.duration, anim.firstFrame)
+		})),
+		map(anim => [anim.firstFrame, anim]),
+		Object.fromEntries
+	)(reqMap)
+
+	console.log(animations)
 
 	const getSpriteSheet = id => {
 		return reqMap.tileSets.find(ts => id >= ts.firstgid && id <= ts.lastgid)
@@ -84,14 +94,21 @@ const loadLevel = canvas => async (world, level) => {
 			const spriteSheet = getSpriteSheet(tile)
 			if (!spriteSheet) return
 			const sseid = spriteSheets[spriteSheet.name]
-
+			const gid = clearFlags(tile) - spriteSheet.firstgid
 			const eid = createSprite(
 				world,
 				sseid,
-				tile - spriteSheet.firstgid,
+				gid,
 				(position.x * spriteSheet.tileWidth) + (spriteSheet.tileWidth / 2),
 				(position.y * spriteSheet.tileHeight) + (spriteSheet.tileHeight / 2),
 			)
+
+			if (hasProp(gid)(animations)) {
+				addComponent(world, CurrentAnimation, eid)
+				const anim = prop(gid)(animations)
+				CurrentAnimation.id[eid] = anim.eid
+				console.log(eid, 'has animation', anim)
+			}
 		},
 		(obj) => {
 			const spriteSheet = getSpriteSheet(obj.gid)
@@ -119,8 +136,7 @@ const loadLevel = canvas => async (world, level) => {
 				createDamageZone(world, obj.x, obj.y, obj.width, obj.height)
 			} else if (obj.type === 'warp') {
 				const level = obj.properties.find(prop => prop.name === 'level').value
-				console.log('WARP TO', level)
-				const eid = createWarp(world, obj.x, obj.y, obj.width, obj.height, level)
+				createWarp(world, obj.x, obj.y, obj.width, obj.height, level)
 			}
 		},
 		img => {

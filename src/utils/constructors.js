@@ -166,8 +166,8 @@ export function createWarp(world, x, y, w, h, level) {
 }
 
 export function createCoin(world, spriteSheet) {
-  const spin = createAnimation(world, 6, 10, 0)
-  const collect = createAnimation(world, 6, 10, 7, false)
+  const spin = createAnimation(world, 6, 100, 0)
+  const collect = createAnimation(world, 6, 100, 7, false)
 
   const w = SpriteSheet.frameWidth[spriteSheet]
   const h = SpriteSheet.frameHeight[spriteSheet]
@@ -198,8 +198,8 @@ export function createCoin(world, spriteSheet) {
 }
 
 export function createPlayer(world, spriteSheet) {
-  const idle = createAnimation(world, 3, 10, 0)
-  const walk = createAnimation(world, 3, 10, 3)
+  const idle = createAnimation(world, 3, 100, 0)
+  const walk = createAnimation(world, 3, 100, 3)
 
   const w = SpriteSheet.frameWidth[spriteSheet]
   const h = SpriteSheet.frameHeight[spriteSheet]
@@ -224,7 +224,7 @@ export function createPlayer(world, spriteSheet) {
     addComponent(world, Intent, eid)
     Intent.speed[eid] = 1.5
     Intent.jumpStrength[eid] = 0.017
-    Intent.dashStrength[eid] = 0.2
+    Intent.dashStrength[eid] = 0.65
     Intent.dashAudio[eid] = world.audioIDs.bark
     Intent.movement[eid] = 0
     Intent.jump[eid] = 0

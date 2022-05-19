@@ -1,5 +1,12 @@
-import { map, pipe } from './helpers.js'
+import { filter, flat, hasProp, map, pipe, prop, tap } from './helpers.js'
 import { match } from './match.js'
+
+const FlipFlags = Object.values({
+	Horizontal: 0x80000000,
+	Vertical: 0x40000000,
+	Diagonal: 0x20000000,
+	Rotated: 0x10000000
+})
 
 const LayerName = Object.freeze({
 	TileLayer: 'tilelayer',
@@ -76,18 +83,18 @@ const getLastGid = (firstgid, tileSet) => (
 
 export const createTileSet = json => {
 	const {
-		name,
 		image,
 		imagewidth: imageWidth,
 		imageheight: imageHeight,
 		tilewidth: tileWidth,
-		tileheight: tileHeight
+		tileheight: tileHeight,
+		...tileset
 	} = json
 
 	const tileAmountWidth = Math.floor(imageWidth / tileWidth)
 
 	return {
-		name,
+		...tileset,
 		tileWidth,
 		tileHeight,
 		source: new URL(image, base),
@@ -96,6 +103,23 @@ export const createTileSet = json => {
 		tileAmountWidth,
 	}
 }
+
+
+export const parseAnimations = pipe(
+	prop('tileSets'),
+	filter(hasProp('tiles')),
+	map(prop('tiles')),
+	flat(1),
+	filter(hasProp('animation')),
+	map(tile => ({
+		type: tile.type,
+		firstFrame: tile.id,
+		duration: tile.animation[0].duration,
+		length: tile.animation.length
+	}))
+)
+
+export const clearFlags = gid => gid & ~(FlipFlags.reduce((val, flag) => val | flag))
 
 export const loadMap = (map, tileCallback, objectCallback, imageCallback) => {
 	map.layers.forEach(loadLayer(tileCallback, objectCallback, imageCallback))

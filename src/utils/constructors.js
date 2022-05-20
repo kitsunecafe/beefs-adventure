@@ -1,4 +1,4 @@
-import { addComponent, addEntity } from '/static/js/bitecs.mjs'
+import { addComponent, addEntity } from '../../static/js/bitecs.js'
 import {
   Animation,
   Audio,
@@ -12,14 +12,17 @@ import {
   DamageZone,
   Dynamic,
   EntityAnimation,
+  Event,
   Intent,
   LastCheckpoint,
+  Persistent,
   Player,
   Position,
   ReceivesInput,
   Sensor,
   Sprite,
   SpriteSheet,
+  Text,
   Purse,
   Warp
 } from '../components/index.js'
@@ -42,7 +45,6 @@ export function createObject(world, x, y) {
 }
 
 export function createCollider(world, x, y, w, h, offsetX, offsetY) {
-  // console.log('createCollider(', arguments, ')')
   const eid = createObject(world, x, y)
   const ox = offsetX || 0
   const oy = offsetY || 0
@@ -50,8 +52,6 @@ export function createCollider(world, x, y, w, h, offsetX, offsetY) {
   addComponent(world, Collider, eid)
   Collider.width[eid] = w
   Collider.height[eid] = h
-  // Collider.offsetX[eid] = ox
-  // Collider.offsetY[eid] = oy
 
   addComponent(world, Body, eid)
   Body.mass[eid] = 1
@@ -65,11 +65,13 @@ export function createCamera(world, canvas, target) {
   addComponent(world, Camera, eid)
   Camera.following[eid] = target
 
-  Camera.width[eid] = canvas.width / 1 
+  Camera.width[eid] = canvas.width / 1
   Camera.height[eid] = canvas.height / 1.49
 
   Camera.deadzoneX[eid] = canvas.width / 3
   Camera.deadzoneY[eid] = canvas.height / 4
+
+  addComponent(world, Persistent, eid)
 
   return eid
 }
@@ -139,16 +141,49 @@ export function createSprite(world, spriteSheet, tile, x, y, options) {
   return eid
 }
 
-export function createCheckpoint(world, x, y, w, h) {
+export function createSensor(world, x, y, w, h) {
   const eid = createCollider(world, x, y, w, h)
-  addComponent(world, Checkpoint, eid)
   addComponent(world, Sensor, eid)
+  return eid
+}
+
+export function createCheckpoint(world, x, y, w, h) {
+  const eid = createSensor(world, x, y, w, h)
+  addComponent(world, Checkpoint, eid)
+  return eid
 }
 
 export function createDamageZone(world, x, y, w, h) {
-  const eid = createCollider(world, x, y, w, h)
+  const eid = createSensor(world, x, y, w, h)
   addComponent(world, DamageZone, eid)
-  addComponent(world, Sensor, eid)
+  return eid
+}
+
+export function createEvent(world, x, y, w, h, eventName) {
+  const event = Object.values(world.events).findIndex(evt => evt.name === eventName)
+
+  if (event >= 0) {
+    const eid = createSensor(world, x, y, w, h)
+    addComponent(world, Event, eid)
+    Event.id[eid] = event
+
+    return eid
+  }
+
+  return -1
+}
+
+export function createText(world, x, y, w, h, text) {
+  const eid = createObject(world, x, y)
+
+  addComponent(world, Collider, eid)
+  Collider.width[eid] = w
+  Collider.height[eid] = h
+
+  addComponent(world, Text, eid)
+  Text.id[eid] = world.text.add(text)
+
+  return eid
 }
 
 export function createWarp(world, x, y, w, h, level) {
@@ -165,9 +200,11 @@ export function createWarp(world, x, y, w, h, level) {
   return -1
 }
 
-export function createCoin(world, spriteSheet) {
-  const spin = createAnimation(world, 6, 100, 0)
-  const collect = createAnimation(world, 6, 100, 7, false)
+export function createCoin(world, spriteSheet, animations) {
+  const anims = Object.values(animations)
+
+  const spin = anims.find(anim => anim.type === 'coin-spin').eid
+  const collect = anims.find(anim => anim.type === 'coin-collect').eid
 
   const w = SpriteSheet.frameWidth[spriteSheet]
   const h = SpriteSheet.frameHeight[spriteSheet]
@@ -197,45 +234,45 @@ export function createCoin(world, spriteSheet) {
   }
 }
 
-export function createPlayer(world, spriteSheet) {
-  const idle = createAnimation(world, 3, 100, 0)
-  const walk = createAnimation(world, 3, 100, 3)
+export function createPlayer(world, spriteSheet, animations, x, y) {
+  const anims = Object.values(animations)
+  const idle = anims.find(anim => anim.type === 'dog-idle').eid
+  const walk = anims.find(anim => anim.type === 'dog-walk').eid
 
   const w = SpriteSheet.frameWidth[spriteSheet]
   const h = SpriteSheet.frameHeight[spriteSheet]
 
-  return (x, y) => {
-    const eid = createCollider(world, x - (w / 2), y - (h / 2), w, h)
+  const eid = createCollider(world, x - (w / 2), y - (h / 2), w, h)
 
-    addComponent(world, Sprite, eid)
-    Sprite.spritesheet[eid] = spriteSheet
-    Sprite.frame[eid] = 0
-    Sprite.rotation[eid] = 0
-    Sprite.scaleX[eid] = 1
-    Sprite.scaleY[eid] = 1
+  addComponent(world, Sprite, eid)
+  Sprite.spritesheet[eid] = spriteSheet
+  Sprite.frame[eid] = 0
+  Sprite.rotation[eid] = 0
+  Sprite.scaleX[eid] = 1
+  Sprite.scaleY[eid] = 1
 
-    addComponent(world, EntityAnimation, eid)
-    EntityAnimation.idle[eid] = idle
-    EntityAnimation.walk[eid] = walk
+  addComponent(world, EntityAnimation, eid)
+  EntityAnimation.idle[eid] = idle
+  EntityAnimation.walk[eid] = walk
 
-    addComponent(world, CurrentAnimation, eid)
-    CurrentAnimation.id[eid] = idle
+  addComponent(world, CurrentAnimation, eid)
+  CurrentAnimation.id[eid] = idle
 
-    addComponent(world, Intent, eid)
-    Intent.speed[eid] = 1.5
-    Intent.jumpStrength[eid] = 0.017
-    Intent.dashStrength[eid] = 0.65
-    Intent.dashAudio[eid] = world.audioIDs.bark
-    Intent.movement[eid] = 0
-    Intent.jump[eid] = 0
-    Intent.dash[eid] = 0
+  addComponent(world, Intent, eid)
+  Intent.speed[eid] = 1.5
+  Intent.jumpStrength[eid] = 0.017
+  Intent.dashStrength[eid] = 0.65
+  Intent.dashAudio[eid] = world.audioIDs.bark
+  Intent.movement[eid] = 0
+  Intent.jump[eid] = 0
+  Intent.dash[eid] = 0
 
-    addComponent(world, ReceivesInput, eid)
-    addComponent(world, Dynamic, eid)
-    addComponent(world, Player, eid)
-    addComponent(world, Purse, eid)
-    addComponent(world, LastCheckpoint, eid)
+  addComponent(world, ReceivesInput, eid)
+  addComponent(world, Dynamic, eid)
+  addComponent(world, Player, eid)
+  addComponent(world, Purse, eid)
+  addComponent(world, Persistent, eid)
+  addComponent(world, LastCheckpoint, eid)
 
-    return eid
-  }
+  return eid
 }

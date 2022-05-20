@@ -1,5 +1,5 @@
-import { defineQuery, hasComponent } from '/static/js/bitecs.mjs'
-import { Body, Contact, Dynamic } from '../components/index.js'
+import { defineQuery, hasComponent } from '../../static/js/bitecs.js'
+import { Body, Contact, Dynamic, Sensor } from '../components/index.js'
 import { BodyProxy } from '../proxies/body.js'
 import { ContactProxy } from '../proxies/contact.js'
 
@@ -21,15 +21,19 @@ export default (normalLimit = 0.9) => {
 		for (let index = 0; index < contacts.length; index++) {
 			contact.eid = contacts[index]
 
-			if (contact.normalY < normalLimit) {
+			if (hasComponent(world, Sensor, contact.a) || hasComponent(world, Sensor, contact.b)) {
 				continue
 			}
 
-			if (hasComponent(world, Body, contact.a) && hasComponent(world, Dynamic, contact.a)) {
-				Body.grounded[contact.a] = 1
+			const direction = hasComponent(world, Dynamic, contact.a) ? -1 : 1
+			if (contact.normalY * direction < normalLimit * direction) {
+				continue
 			}
 
-			if (hasComponent(world, Body, contact.b) && hasComponent(world, Dynamic, contact.b)) {
+			if (hasComponent(world, Dynamic, contact.a)) {
+				Body.grounded[contact.a] = 1
+			}
+			if (hasComponent(world, Dynamic, contact.b)) {
 				Body.grounded[contact.b] = 1
 			}
 		}

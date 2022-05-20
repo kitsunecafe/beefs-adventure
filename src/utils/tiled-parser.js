@@ -18,7 +18,8 @@ const json = url => fetch(url).then(res => res.json())
 const eq = b => a => a === b
 const eqType = b => a => eq(b)(a.type)
 const id = x => x
-const base = new URL(`${window.location.origin}/static/tiles/maps/`)
+const href = window.location.href.replace('index.html', '')
+const base = new URL(`${href}/static/tiles/maps/`)
 
 export const parseMap = src => {
 	const url = new URL(src, base)
@@ -29,6 +30,7 @@ export const parseMap = src => {
 				height,
 				tilewidth: tileWidth,
 				tileheight: tileHeight,
+				backgroundcolor: backgroundColor,
 				layers,
 				properties
 			} = res
@@ -40,6 +42,7 @@ export const parseMap = src => {
 				height,
 				tileWidth,
 				tileHeight,
+				backgroundColor,
 				layers,
 				tileSets,
 				...parseCustomProperties(properties)
@@ -108,10 +111,16 @@ export const createTileSet = json => {
 export const parseAnimations = pipe(
 	prop('tileSets'),
 	filter(hasProp('tiles')),
+	map(set => {
+		const firstgid = set.firstgid
+		const tiles = map(tile => ({ ...tile, gid: tile.id + firstgid }))(set.tiles)
+		return { ...set, tiles }
+	}),
 	map(prop('tiles')),
 	flat(1),
 	filter(hasProp('animation')),
 	map(tile => ({
+		gid: tile.gid,
 		type: tile.type,
 		firstFrame: tile.id,
 		duration: tile.animation[0].duration,

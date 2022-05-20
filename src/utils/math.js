@@ -100,3 +100,8 @@ export const toCartesian = (w, h) => {
 
 	return (x, y) => ([x + hw, y + hh])
 }
+
+export const roundF = (digit, number) => {
+	const precision = Math.pow(10, digit)
+	return Math.round(number * precision) / precision
+}

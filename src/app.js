@@ -1,4 +1,4 @@
-import { createWorld } from '/static/js/bitecs.mjs'
+import { createWorld } from '../static/js/bitecs.js'
 
 import animationSystem from './systems/animation.js'
 import spritesheetSystem from './systems/spritesheet.js'
@@ -18,6 +18,8 @@ import checkpointSystem from './systems/checkpoint.js'
 import respawnSystem from './systems/respawn.js'
 import resourceLoader from './systems/resource-loader.js'
 import levelLoader from './systems/level-loader.js'
+import eventSystem from './systems/events.js'
+import textSystem from './systems/text.js'
 
 import raf from './utils/raf.js'
 import { pipeAsync as pipe } from './utils/helpers.js'
@@ -28,7 +30,7 @@ async function create() {
   const world = createWorld()
   world.time = { fixedDelta: 0, delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
-  world.levels = ['level-1.tmj', 'level-2.tmj', 'level-3.tmj']
+  world.levels = ['level-1.tmj', 'level-2.tmj', 'level-3.tmj', 'end.tmj']
 
   const state = {
     canvas,
@@ -38,7 +40,7 @@ async function create() {
     ),
     updateSystems: pipe(
       levelLoader(canvas),
-      statsSystem(),
+      // statsSystem(),
       inputSystem(),
       spritesheetSystem(),
       colliderSystem(),
@@ -47,7 +49,8 @@ async function create() {
       respawnSystem(),
       physicsSystem(),
       groundCheckSystem(),
-      warpSystem()
+      warpSystem(),
+      eventSystem()
     ),
     renderSystems: pipe(
       audioSystem(world.audioContext),
@@ -55,6 +58,7 @@ async function create() {
       animatorSystem(),
       cameraSystem(),
       removalSystem(),
+      textSystem(),
       rendererSystem(canvas)
     )
   }

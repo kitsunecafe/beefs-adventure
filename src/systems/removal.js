@@ -1,4 +1,4 @@
-import { defineQuery, removeEntity } from '/static/js/bitecs.mjs'
+import { defineQuery, removeEntity } from '../../static/js/bitecs.js'
 import { Remove } from '../components/index.js'
 
 export default () => {
@@ -6,11 +6,12 @@ export default () => {
 
 	return world => {
 		const entities = query(world)
-		const currentFrame = world.time.elapsedFrames
+		const elapsed = world.time.elapsed
+
 		for (let i = 0; i < entities.length; i++) {
-			// console.log(Remove.onFrame[i], currentFrame)
 			const id = entities[i]
-			if (Remove.onFrame[id] < currentFrame) {
+
+			if (Remove.time[id] < elapsed) {
 				removeEntity(world, id)
 			}
 		}

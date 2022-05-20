@@ -1,4 +1,4 @@
-import { addComponent } from '/static/js/bitecs.mjs'
+import { addComponent } from '../../static/js/bitecs.js'
 
 export class BaseProxy {
 	constructor(store, eid) {

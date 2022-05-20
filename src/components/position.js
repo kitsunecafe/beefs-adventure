@@ -1,4 +1,4 @@
-import { defineComponent, Types } from '/static/js/bitecs.mjs'
+import { defineComponent, Types } from '../../static/js/bitecs.js'
 
 export const Position = defineComponent({
 	x: Types.f32,

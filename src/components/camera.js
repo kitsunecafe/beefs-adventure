@@ -1,4 +1,4 @@
-import { defineComponent, Types } from '/static/js/bitecs.mjs'
+import { defineComponent, Types } from '../../static/js/bitecs.js'
 
 export const Camera = defineComponent({
 	deadzoneX: Types.f32,

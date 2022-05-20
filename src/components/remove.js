@@ -1,7 +1,7 @@
-import { defineComponent, Types } from '/static/js/bitecs.mjs'
+import { defineComponent, Types } from '../../static/js/bitecs.js'
 
 export const Remove = defineComponent({
-	onFrame: Types.ui16
+	time: Types.f32
 })
 
 

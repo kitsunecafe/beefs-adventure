@@ -1,19 +1,20 @@
-import { addComponent, defineQuery, getAllEntities, removeEntity } from '/static/js/bitecs.mjs'
+import { addComponent, defineQuery, Not, removeEntity } from '../../static/js/bitecs.js'
 import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap, parseAnimations, clearFlags } from '../utils/tiled-parser.js'
-import { createAnimation, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createPlayer, createSprite, createSpriteSheet, createWarp } from '../utils/constructors.js'
-import { hasProp, prop, load, map, mapObj, pipe, range, zip } from '../utils/helpers.js'
+import { createAnimation, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createEvent, createPlayer, createSprite, createSpriteSheet, createText, createWarp } from '../utils/constructors.js'
+import { hasProp, prop, createImage, map, mapObj, pipe, range, zip, isNull } from '../utils/helpers.js'
 import { Rectangle } from '../utils/rectangle.js'
-import { CurrentAnimation, LoadLevel, SpriteSheet } from '../components/index.js'
+import { CurrentAnimation, LoadLevel, Persistent, Translate, SpriteSheet } from '../components/index.js'
 import { hexToRGB } from '../utils/color.js'
 
 const loadImages = map => {
 	const keys = Object.keys(map)
 
-	return Promise.all(Object.values(map).map(load)).then(zip.bind(null, keys))
+	return Promise.all(Object.values(map).map(createImage)).then(zip.bind(null, keys))
 }
 
+const allEntitiesQuery = defineQuery([Not(Persistent)])
 const removeAllEntities = world => {
-	const entities = getAllEntities(world)
+	const entities = allEntitiesQuery(world)
 	for (let i = 0; i < entities.length; i++) {
 		const id = entities[i]
 		removeEntity(world, id)
@@ -74,11 +75,9 @@ const loadLevel = canvas => async (world, level) => {
 			...anim,
 			eid: createAnimation(world, anim.length, anim.duration, anim.firstFrame)
 		})),
-		map(anim => [anim.firstFrame, anim]),
+		map(anim => [anim.gid, anim]),
 		Object.fromEntries
 	)(reqMap)
-
-	console.log(animations)
 
 	const getSpriteSheet = id => {
 		return reqMap.tileSets.find(ts => id >= ts.firstgid && id <= ts.lastgid)
@@ -93,8 +92,11 @@ const loadLevel = canvas => async (world, level) => {
 
 			const spriteSheet = getSpriteSheet(tile)
 			if (!spriteSheet) return
+
 			const sseid = spriteSheets[spriteSheet.name]
-			const gid = clearFlags(tile) - spriteSheet.firstgid
+			const cGid = clearFlags(tile)
+			const gid = cGid - spriteSheet.firstgid
+
 			const eid = createSprite(
 				world,
 				sseid,
@@ -103,28 +105,33 @@ const loadLevel = canvas => async (world, level) => {
 				(position.y * spriteSheet.tileHeight) + (spriteSheet.tileHeight / 2),
 			)
 
-			if (hasProp(gid)(animations)) {
+			if (hasProp(cGid)(animations)) {
 				addComponent(world, CurrentAnimation, eid)
-				const anim = prop(gid)(animations)
+				const anim = prop(cGid)(animations)
 				CurrentAnimation.id[eid] = anim.eid
-				console.log(eid, 'has animation', anim)
 			}
 		},
 		(obj) => {
+			console.log(obj)
 			const spriteSheet = getSpriteSheet(obj.gid)
 
 			if (obj.type === 'playerSpawn') {
-				const sseid = spriteSheets[spriteSheet.name]
-				const eid = createPlayer(world, sseid)(
-					obj.x,
-					obj.y
-				)
+				if (isNull(world.player)) {
+					const sseid = spriteSheets[spriteSheet.name]
+					const eid = createPlayer(world, sseid, animations, obj.x, obj.y)
+					world.player = eid
 
-				createCamera(world, canvas.c, eid)
+					createCamera(world, canvas.c, eid)
+				} else {
+					addComponent(world, Translate, world.player)
+					Translate.x[world.player] = obj.x
+					Translate.y[world.player] = obj.y
+				}
 			} else if (obj.type === 'coin') {
+				console.log(obj, obj.gid, spriteSheet, spriteSheets)
 				const sseid = spriteSheets[spriteSheet.name]
 				if (!coinFactory) {
-					coinFactory = createCoin(world, sseid)
+					coinFactory = createCoin(world, sseid, animations)
 				}
 
 				coinFactory(obj.x, obj.y)
@@ -137,6 +144,8 @@ const loadLevel = canvas => async (world, level) => {
 			} else if (obj.type === 'warp') {
 				const level = obj.properties.find(prop => prop.name === 'level').value
 				createWarp(world, obj.x, obj.y, obj.width, obj.height, level)
+			} else if (obj.type === 'event') {
+				createEvent(world, obj.x, obj.y, obj.width, obj.height, obj.name)
 			}
 		},
 		img => {

@@ -1,4 +1,4 @@
-import { defineQuery } from '/static/js/bitecs.mjs'
+import { defineQuery } from '../../static/js/bitecs.js'
 import { CurrentAnimation, EntityAnimation, Intent, Sprite } from '../components/index.js'
 import { IntentProxy } from "../proxies/intent.js"
 

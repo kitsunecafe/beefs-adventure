@@ -1,7 +1,8 @@
-import { addComponent, defineQuery, hasComponent, removeComponent, removeEntity } from '/static/js/bitecs.mjs'
+import { addComponent, defineQuery, hasComponent, removeComponent, removeEntity } from '../../static/js/bitecs.js'
 import { Animation, Coin, CoinAnimation, CurrentAnimation, Contact, Remove, Purse, Sprite } from '../components/index.js'
 import { ContactProxy } from '../proxies/contact.js'
 import { createAudio } from '../utils/constructors.js'
+import { roundF } from '../utils/math.js'
 
 export default () => {
 	const query = defineQuery([Contact])
@@ -35,7 +36,7 @@ export default () => {
 			Sprite.frame[coin] = Animation.firstFrame[aid]
 
 			addComponent(world, Remove, coin)
-			Remove.onFrame[coin] = world.time.elapsedFrames + duration
+			Remove.time[coin] = world.time.elapsed + duration / 1000
 
 			createAudio(world, Coin.audio[coin])
 			removeComponent(world, Coin, coin)

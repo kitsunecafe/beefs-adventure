@@ -1,13 +1,11 @@
 // https://stackoverflow.com/questions/27462949/convert-position-coordinates-to-canvas-coordinates
 // https://stackoverflow.com/questions/54444944/convert-html-canvas-coordinate-system-to-cartesian-system
-import { defineQuery } from '/static/js/bitecs.mjs'
+import { defineQuery } from '../../static/js/bitecs.js'
 import { Camera, Position, Sprite } from '../components/index.js'
 import { CameraProxy } from '../proxies/camera.js'
 import { SpriteSheetProxy } from '../proxies/spritesheet.js'
 import { PositionProxy } from '../proxies/vector2.js'
 import { Rectangle } from '../utils/rectangle.js'
-
-let i = 0
 
 export default (canvas) => {
   const spriteQuery = defineQuery([Position, Sprite])
@@ -52,20 +50,15 @@ export default (canvas) => {
       canvas.rot(Sprite.rotation[id])
       canvas.scale(Sprite.scaleX[id], Sprite.scaleY[id])
 
-      const x = (Sprite.frame[id] % spriteSheet.columns) * spriteSheet.frameWidth + spriteSheet.offsetX + 0.5
+      const x = (Sprite.frame[id] % spriteSheet.columns) * spriteSheet.frameWidth + spriteSheet.offsetX
       const y = Math.floor(Sprite.frame[id] / spriteSheet.columns) * spriteSheet.frameHeight + 1
 
       const texture = world.textures[tid]
       const u0 = x / texture.width
       const v0 = y / texture.height
-      const u1 = u0 + ((spriteSheet.frameWidth - 0.5) / texture.width)
+      const u1 = u0 + ((spriteSheet.frameWidth) / texture.width)
       const v1 = v0 + ((spriteSheet.frameHeight - 1) / texture.height)
 
-      // if (i % 5000 === 0) {
-      //   console.log(u0, v0, u1, v1)
-      // }
-
-      // i++
       canvas.img(
         texture,
         -xOffset,
@@ -81,7 +74,6 @@ export default (canvas) => {
       canvas.pop()
     }
 
-    i++
     canvas.flush()
     return world
   }

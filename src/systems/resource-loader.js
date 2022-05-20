@@ -1,9 +1,11 @@
-import { addComponent, addEntity } from '/static/js/bitecs.mjs'
+import { addComponent, addEntity } from '../../static/js/bitecs.js'
 import { LoadLevel } from '../components/index.js'
 import { Actions } from '../utils/actions.js'
 import { loadBuffers } from '../utils/bufferloader.js'
 import Input from '../utils/device-input.js'
 import { range, zip } from '../utils/helpers.js'
+import * as Events from '../events/index.js'
+import Store from '../utils/store.js'
 
 const loadAudio = async (context, map) => {
 	const keys = Object.keys(map)
@@ -31,9 +33,14 @@ export default () => {
 		// Input
 		world.actions = Actions(Input)
 
+		// Text & strings
+		world.text = new Store(128)
+		
+		world.events = Events
+
 		const eid = addEntity(world)
 		addComponent(world, LoadLevel, eid)
-		LoadLevel.id[eid] = 0
+		LoadLevel.id[eid] = 3
 
 		return world
 	}

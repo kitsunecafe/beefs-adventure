@@ -1,4 +1,4 @@
-import { defineQuery, removeEntity } from '/static/js/bitecs.mjs'
+import { defineQuery, removeEntity } from '../../static/js/bitecs.js'
 import { Audio } from '../components/index.js'
 
 export default () => {

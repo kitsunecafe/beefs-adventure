@@ -1,5 +1,5 @@
-import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from '/static/js/bitecs.mjs'
-import Matter from 'https://esm.run/matter-js'
+import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from '../../static/js/bitecs.js'
+import Matter from '../../static/js/matter.min.js'
 import { Body, Collider, Contact, Dynamic, Intent, Translate, Player, Position, Sensor } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { BodyProxy } from '../proxies/body.js'
@@ -44,6 +44,7 @@ export default () => {
 
 	const vector = Vector.create()
 	const force = Vector.create()
+
 	return world => {
 		const contacts = contactQuery(world)
 
@@ -100,8 +101,17 @@ export default () => {
 
 		const bodies = composites.items.filter(identity)
 
+		dynamicQuery(world).forEach(id => {
+			collider.eid = body.eid = position.eid = id
+
+			const composite = composites.get(body.index)
+			position.x = composite.position.x
+			position.y = composite.position.y
+		})
+
 		translationQuery(world).forEach(id => {
 			position.eid = id
+
 			const composite = composites.get(body.index)
 
 			Matter.Body.setPosition(composite, {
@@ -110,14 +120,6 @@ export default () => {
 			})
 
 			removeComponent(world, Translate, id)
-		})
-
-		dynamicQuery(world).forEach(id => {
-			collider.eid = body.eid = position.eid = id
-
-			const composite = composites.get(body.index)
-			position.x = composite.position.x
-			position.y = composite.position.y
 		})
 
 		intentQuery(world).forEach(id => {
@@ -162,12 +164,10 @@ export default () => {
 					))
 
 					const bounds = body.facing > 0 ? collision.bounds.min : collision.bounds.max
-					const halfWidth = composite.bounds.max.x - composite.bounds.min.x
 					dashPosition.x = bounds.x
 				}
 
 				Matter.Body.setPosition(composite, dashPosition)
-				// Matter.Body.applyForce(composite, vector, force)
 			}
 		})
 

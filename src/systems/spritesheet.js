@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery } from '/static/js/bitecs.mjs'
+import { defineQuery, enterQuery } from '../../static/js/bitecs.js'
 import { SpriteSheet, Texture } from '../components/index.js'
 
 export default () => {

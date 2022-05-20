@@ -8,6 +8,57 @@
  "tilecount":12,
  "tiledversion":"1.8.4",
  "tileheight":8,
+ "tiles":[
+        {
+         "animation":[
+                {
+                 "duration":100,
+                 "tileid":0
+                }, 
+                {
+                 "duration":100,
+                 "tileid":1
+                }, 
+                {
+                 "duration":100,
+                 "tileid":2
+                }, 
+                {
+                 "duration":100,
+                 "tileid":3
+                }, 
+                {
+                 "duration":100,
+                 "tileid":4
+                }, 
+                {
+                 "duration":100,
+                 "tileid":5
+                }],
+         "id":0,
+         "type":"coin-spin"
+        }, 
+        {
+         "animation":[
+                {
+                 "duration":100,
+                 "tileid":8
+                }, 
+                {
+                 "duration":100,
+                 "tileid":9
+                }, 
+                {
+                 "duration":100,
+                 "tileid":10
+                }, 
+                {
+                 "duration":100,
+                 "tileid":11
+                }],
+         "id":8,
+         "type":"coin-collect"
+        }],
  "tilewidth":8,
  "type":"tileset",
  "version":"1.8"

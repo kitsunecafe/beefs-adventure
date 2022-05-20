@@ -1,4 +1,4 @@
-import { defineQuery, hasComponent, removeEntity } from '/static/js/bitecs.mjs'
+import { defineQuery, hasComponent, removeEntity } from '../../static/js/bitecs.js'
 import { Contact, Checkpoint, LastCheckpoint } from '../components/index.js'
 import { ContactProxy } from '../proxies/contact.js'
 

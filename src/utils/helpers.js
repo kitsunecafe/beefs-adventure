@@ -1,4 +1,4 @@
-export async function load(src) {
+export function createImage(src) {
 	return new Promise((resolve, reject) => {
 		const image = new Image()
 		image.onload = () => resolve(image)
@@ -34,3 +34,5 @@ export const mapObj = fn => pipe(
 
 export const prop = key => obj => obj[key]
 export const hasProp = key => obj => obj && obj.hasOwnProperty(key)
+export const sleep = ms => new Promise(r => setTimeout(r, ms))
+export const thunk = fn => () => fn()

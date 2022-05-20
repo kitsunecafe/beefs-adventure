@@ -1,5 +1,5 @@
 // https://jsfiddle.net/gfcarv/QKgHs/
-import { defineQuery } from '/static/js/bitecs.mjs'
+import { defineQuery } from '../../static/js/bitecs.js'
 import { Camera, Position } from '../components/index.js'
 import { CameraProxy } from '../proxies/camera.js'
 import { PositionProxy } from '../proxies/vector2.js'

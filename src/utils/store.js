@@ -1,8 +1,16 @@
 export default class Store {
-	constructor(size) {
-		this.items = new Array(size)
+	constructor(size, initialSize) {
+		this.items = new Array(initialSize || 0)
+		this.size = size
 		this._id = 0
 		this._rm = []
+	}
+
+	static from(iterable, size) {
+		const store = new Store(size, iterable.length)
+		store.items = iterable
+		store._id = iterable.length - 1
+		return store
 	}
 
 	_getIndex() {
@@ -34,7 +42,7 @@ export default class Store {
 	}
 
 	removeIndex(index) {
-		if (index >= 0 || index < this.items.length) {
+		if (index >= 0 || index < this.size) {
 			this.items[index] = null
 			this._rm.push(index)
 		}

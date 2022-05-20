@@ -1,0 +1,6 @@
+dist/
+node_modules/
+*.zip
+*.7z
+package.json
+package-lock.json

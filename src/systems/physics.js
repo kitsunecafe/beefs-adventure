@@ -44,6 +44,7 @@ export default () => {
 
 	const vector = Vector.create()
 	const force = Vector.create()
+	const zero = Vector.create()
 
 	return world => {
 		const contacts = contactQuery(world)
@@ -118,6 +119,8 @@ export default () => {
 				x: Translate.x[id],
 				y: Translate.y[id]
 			})
+
+			Matter.Body.setVelocity(composite, zero)
 
 			removeComponent(world, Translate, id)
 		})

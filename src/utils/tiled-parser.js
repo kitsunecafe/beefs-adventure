@@ -1,5 +1,7 @@
 import { filter, flat, hasProp, map, pipe, prop, tap } from './helpers.js'
 import { match } from './match.js'
+import { max, min, mul } from './math.js'
+import { Rectangle } from './rectangle.js'
 
 const FlipFlags = Object.values({
 	Horizontal: 0x80000000,
@@ -26,8 +28,6 @@ export const parseMap = src => {
 	return json(url)
 		.then(async res => {
 			const {
-				width,
-				height,
 				tilewidth: tileWidth,
 				tileheight: tileHeight,
 				backgroundcolor: backgroundColor,
@@ -38,16 +38,59 @@ export const parseMap = src => {
 			const tileSets = await Promise.all(res.tilesets.map(loadTileSet))
 
 			return {
-				width,
-				height,
 				tileWidth,
 				tileHeight,
 				backgroundColor,
 				layers,
 				tileSets,
-				...parseCustomProperties(properties)
+				...parseCustomProperties(properties),
+				...res
 			}
 		})
+}
+
+export const getDimensions = (level, usePixels) => {
+	const usingPixel = usePixels || false
+
+	const sx = usingPixel ? level.tileWidth : 1
+	const sy = usingPixel ? level.tileHeight : 1
+
+	if (!level.infinite) return new Rectangle(0, 0, level.width * sx, level.height * sy)
+
+	const layers = level.layers.filter(eqType(LayerName.TileLayer))
+
+	const x = pipe(
+		map(prop('startx')),
+		map(mul(sx)),
+		min,
+	)(layers)
+
+	const y = pipe(
+		map(prop('starty')),
+		map(mul(sy)),
+		min
+	)(layers)
+
+	const w = pipe(
+		map(l => l.startx + l.width),
+		map(mul(sx)),
+		max
+	)(layers)
+
+	const h = pipe(
+		map(l => l.starty + l.height),
+		map(mul(sy)),
+		max
+	)(layers)
+	
+	console.log(x, y, w, h)
+	return new Rectangle(x, y, w, h)
+	/*
+			x = min(startx)
+			y = min(starty)
+			xMax = max(startX + width)
+			yMax = max(startY + height)
+	*/
 }
 
 const parseCustomProperties = pipe(
@@ -131,12 +174,16 @@ export const parseAnimations = pipe(
 export const clearFlags = gid => gid & ~(FlipFlags.reduce((val, flag) => val | flag))
 
 export const loadMap = (map, tileCallback, objectCallback, imageCallback) => {
-	map.layers.forEach(loadLayer(tileCallback, objectCallback, imageCallback))
+	map.layers.forEach(loadLayer(map, tileCallback, objectCallback, imageCallback))
 }
 
-const loadLayer = (tcb, ocb, icb) => layer => {
+const loadLayer = (map, tcb, ocb, icb) => layer => {
 	match(layer)
-		.on(eqType(LayerName.TileLayer), loadTileLayer(tcb))
+		.on(l =>
+			map.infinite && eqType(LayerName.TileLayer)(l),
+			loadInfiniteTileLayer(tcb)
+		)
+		.on(eqType(LayerName.TileLayer), loadFixedTileLayer(tcb))
 		.on(eqType(LayerName.ObjectGroup), loadObjectLayer(ocb))
 		.on(eqType(LayerName.ImageLayer), loadImageLayer(icb))
 		.otherwise(id(false))
@@ -145,7 +192,17 @@ const loadLayer = (tcb, ocb, icb) => layer => {
 const indexToCoord = w => i => ({ x: i % w, y: Math.floor(i / w) })
 const offsetCoord = (dx, dy) => ({ x, y }) => ({ x: x + dx, y: y + dy })
 
-const loadTileLayer = cb => layer => {
+const loadInfiniteTileLayer = cb => layer => {
+	layer.chunks.forEach(chunk => {
+		loadFixedTileLayer(cb)({
+			...chunk,
+			x: layer.x + chunk.x,
+			y: layer.y + chunk.y
+		})
+	})
+}
+
+const loadFixedTileLayer = cb => layer => {
 	const toCoord = indexToCoord(layer.width)
 	const offset = offsetCoord(layer.x, layer.y)
 	const xy = i => offset(toCoord(i))

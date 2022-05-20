@@ -5,5 +5,6 @@ export const Sprite = defineComponent({
 	frame: Types.ui16,
 	rotation: Types.ui8,
 	scaleX: Types.i8,
-	scaleY: Types.i8
+	scaleY: Types.i8,
+	index: Types.ui8
 })

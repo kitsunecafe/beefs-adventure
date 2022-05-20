@@ -1,9 +1,9 @@
 import { addComponent, defineQuery, Not, removeEntity } from '../../static/js/bitecs.js'
-import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap, parseAnimations, clearFlags } from '../utils/tiled-parser.js'
-import { createAnimation, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createEvent, createPlayer, createSprite, createSpriteSheet, createText, createWarp } from '../utils/constructors.js'
+import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap, parseAnimations, clearFlags, getDimensions } from '../utils/tiled-parser.js'
+import { createAnimation, createAudio, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createEvent, createPlayer, createSprite, createSpriteSheet, createText, createWarp } from '../utils/constructors.js'
 import { hasProp, prop, createImage, map, mapObj, pipe, range, zip, isNull } from '../utils/helpers.js'
 import { Rectangle } from '../utils/rectangle.js'
-import { CurrentAnimation, LoadLevel, Persistent, Translate, SpriteSheet } from '../components/index.js'
+import { CurrentAnimation, LoadLevel, Persistent, Translate, Sprite, SpriteSheet } from '../components/index.js'
 import { hexToRGB } from '../utils/color.js'
 
 const loadImages = map => {
@@ -26,9 +26,11 @@ const loadLevel = canvas => async (world, level) => {
 
 	const gl = canvas.g
 	const reqMap = await parseMap(level)
-	const pixelWidth = reqMap.width * reqMap.tileWidth
-	const pixelHeight = reqMap.height * reqMap.tileHeight
-	world.bounds = new Rectangle(0, 0, pixelWidth, pixelHeight)
+	const dim = getDimensions(reqMap, true)
+	const boundsWidth = Math.max(canvas.c.width, dim.width)
+	const boundsHeight = Math.max(canvas.c.height, dim.height)
+	world.bounds = new Rectangle(dim.x + 16, -canvas.c.height / 2, boundsWidth + 16, boundsHeight)
+	console.log(world.bounds)
 
 	if (reqMap.backgroundColor) {
 		const color = hexToRGB(reqMap.backgroundColor)
@@ -79,6 +81,13 @@ const loadLevel = canvas => async (world, level) => {
 		Object.fromEntries
 	)(reqMap)
 
+	if (reqMap.bgm) {
+		const id = world.audioIDs[reqMap.bgm]
+		if (id) {
+			createAudio(world, id, { loop: true })
+		}
+	}
+
 	const getSpriteSheet = id => {
 		return reqMap.tileSets.find(ts => id >= ts.firstgid && id <= ts.lastgid)
 	}
@@ -112,29 +121,28 @@ const loadLevel = canvas => async (world, level) => {
 			}
 		},
 		(obj) => {
-			console.log(obj)
 			const spriteSheet = getSpriteSheet(obj.gid)
 
 			if (obj.type === 'playerSpawn') {
-				if (isNull(world.player)) {
 					const sseid = spriteSheets[spriteSheet.name]
+				if (isNull(world.player)) {
 					const eid = createPlayer(world, sseid, animations, obj.x, obj.y)
 					world.player = eid
 
 					createCamera(world, canvas.c, eid)
 				} else {
+					Sprite.spritesheet[world.player] = sseid
 					addComponent(world, Translate, world.player)
 					Translate.x[world.player] = obj.x
 					Translate.y[world.player] = obj.y
 				}
 			} else if (obj.type === 'coin') {
-				console.log(obj, obj.gid, spriteSheet, spriteSheets)
 				const sseid = spriteSheets[spriteSheet.name]
 				if (!coinFactory) {
 					coinFactory = createCoin(world, sseid, animations)
 				}
 
-				coinFactory(obj.x, obj.y)
+				coinFactory(obj.x + 4, obj.y)
 			} else if (obj.type === 'collider') {
 				createCollider(world, obj.x, obj.y, obj.width, obj.height)
 			} else if (obj.type === 'checkpoint') {
@@ -154,20 +162,27 @@ const loadLevel = canvas => async (world, level) => {
 			const width = SpriteSheet.frameWidth[spriteSheet]
 			const height = SpriteSheet.frameHeight[spriteSheet]
 
-			const countx = img.repeatx ? reqMap.width * reqMap.tileWidth / width : 1
-			const county = img.repeaty ? reqMap.height * reqMap.tileHeight / height : 1
+			const countx = img.repeatx ? world.bounds.xMax / width : 1
+			const county = img.repeaty ? world.bounds.yMax / height : 1
 
 			const sx = img.offsetx + img.x - reqMap.tileWidth
 			const sy = img.offsety + img.y - reqMap.tileHeight
 
-			for (let y = 0; y < county; y++) {
-				for (let x = 0; x < countx; x++) {
+			const px = img.parallaxx || 1
+			const py = img.parallaxy || 1
+
+			const startx = px === 1 ? 0 : -1
+			const starty = py === 1 ? 0 : -1
+
+			for (let y = starty; y < county; y++) {
+				for (let x = startx; x < countx; x++) {
 					createSprite(
 						world,
 						spriteSheets[img.name],
 						0,
 						sx + (width * x),
-						sy + (height * y)
+						sy + (height * y),
+						{ px, py }
 					)
 				}
 			}

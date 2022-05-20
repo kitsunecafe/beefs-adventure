@@ -16,7 +16,11 @@ export default () => {
 	return async world => {
 		const audioSources = {
 			coin: 'static/audio/sfx_coin_single6.wav',
-			bark: 'static/audio/bark.wav'
+			bark: 'static/audio/bark.wav',
+			bgm1: 'static/audio/Komiku - Time for the walk of the day.mp3',
+			bgm2: 'static/audio/Komiku - Fetch Land.mp3',
+			bgm3: 'static/audio/Komiku - Cat City.mp3',
+			bgm4: 'static/audio/Komiku - Chillin\' Poupi.mp3'
 		}
 
 		// Audio
@@ -40,7 +44,7 @@ export default () => {
 
 		const eid = addEntity(world)
 		addComponent(world, LoadLevel, eid)
-		LoadLevel.id[eid] = 3
+		LoadLevel.id[eid] = 4
 
 		return world
 	}

@@ -34,12 +34,14 @@ export const addPosition = (world, x, y) => id => {
   return id
 }
 
-export function createObject(world, x, y) {
+export function createObject(world, x, y, px, py) {
   const eid = addEntity(world)
 
   addComponent(world, Position, eid)
   Position.x[eid] = x
   Position.y[eid] = y
+  Position.px[eid] = px || 1
+  Position.py[eid] = py || 1
 
   return eid
 }
@@ -65,21 +67,27 @@ export function createCamera(world, canvas, target) {
   addComponent(world, Camera, eid)
   Camera.following[eid] = target
 
-  Camera.width[eid] = canvas.width / 1
-  Camera.height[eid] = canvas.height / 1.49
+  Camera.width[eid] = canvas.width
+  Camera.height[eid] = canvas.height
 
   Camera.deadzoneX[eid] = canvas.width / 3
-  Camera.deadzoneY[eid] = canvas.height / 4
+  Camera.deadzoneY[eid] = canvas.height / 4 
 
   addComponent(world, Persistent, eid)
 
   return eid
 }
 
-export function createAudio(world, audio) {
+const defaultAudioOptions = {
+  loop: false
+}
+
+export function createAudio(world, audio, options) {
+  const opts = Object.assign({}, defaultAudioOptions, options)
   const eid = addEntity(world)
   addComponent(world, Audio, eid)
   Audio.id[eid] = audio
+  Audio.loop[eid] = opts.loop ? 1 : 0
   return eid
 }
 
@@ -115,9 +123,12 @@ export function createSpriteSheet(world, texture, options) {
 }
 
 const defaultSpriteOptions = {
+  px: 1,
+  py: 1,
   rotation: 0,
   scaleX: 1,
-  scaleY: 1
+  scaleY: 1,
+  index: 0
 }
 
 export function createSprite(world, spriteSheet, tile, x, y, options) {
@@ -127,6 +138,8 @@ export function createSprite(world, spriteSheet, tile, x, y, options) {
   addComponent(world, Position, eid)
   Position.x[eid] = x - (SpriteSheet.frameWidth[eid] / 2)
   Position.y[eid] = y - (SpriteSheet.frameHeight[eid] / 2)
+  Position.px[eid] = opts.px
+  Position.py[eid] = opts.py
 
   addComponent(world, Body, eid)
   Body.mass[eid] = 1
@@ -137,6 +150,7 @@ export function createSprite(world, spriteSheet, tile, x, y, options) {
   Sprite.rotation[eid] = opts.rotation
   Sprite.scaleX[eid] = opts.scaleX
   Sprite.scaleY[eid] = opts.scaleY
+  Sprite.index[eid] = opts.index
 
   return eid
 }
@@ -173,7 +187,7 @@ export function createEvent(world, x, y, w, h, eventName) {
   return -1
 }
 
-export function createText(world, x, y, w, h, text) {
+export function createText(world, x, y, w, h, text, options) {
   const eid = createObject(world, x, y)
 
   addComponent(world, Collider, eid)
@@ -181,7 +195,7 @@ export function createText(world, x, y, w, h, text) {
   Collider.height[eid] = h
 
   addComponent(world, Text, eid)
-  Text.id[eid] = world.text.add(text)
+  Text.id[eid] = world.text.add({ text, options: Object.assign({}, options) })
 
   return eid
 }
@@ -250,6 +264,7 @@ export function createPlayer(world, spriteSheet, animations, x, y) {
   Sprite.rotation[eid] = 0
   Sprite.scaleX[eid] = 1
   Sprite.scaleY[eid] = 1
+  Sprite.index[eid] = 1
 
   addComponent(world, EntityAnimation, eid)
   EntityAnimation.idle[eid] = idle

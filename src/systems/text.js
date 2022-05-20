@@ -12,6 +12,7 @@ const createSvg = (width, height, text, options) => `
 						margin:0;
 						font-weight: normal;
 						font-family: ${options.family};
+						color: ${options.color};
 						font-size: ${options.size}px;
 						line-height: ${options.lineHeight}px;
 				}
@@ -35,7 +36,8 @@ const defaultOptions = {
 const createTexture = (width, height, text, options) => {
 	const opts = Object.assign({}, defaultOptions, options)
 	const svg = createSvg(width, height, text, opts)
-	const encoded = svg.replace(/\n/g, '').replace(/"/g, "'")
+	console.log(svg)
+	const encoded = encodeURIComponent(svg.replace(/\n/g, '').replace(/"/g, "'"))
 	return `data:image/svg+xml,${encoded}`
 }
 
@@ -50,7 +52,9 @@ export default () => {
 			const eid = removed[i]
 			const spriteSheet = Sprite.spritesheet[eid]
 			const index = SpriteSheet.texture[spriteSheet]
+
 			world.textures[index] = null
+
 			removeEntity(world, spriteSheet)
 			removeEntity(world, eid)
 		}
@@ -58,12 +62,16 @@ export default () => {
 		const created = createdQuery(world)
 		for (let i = 0; i < created.length; i++) {
 			const eid = created[i]
+			const { text, options } = world.text.get(
+				Text.id[eid]
+			)
+			console.log(text, options)
+
 			const dataUrl = createTexture(
 				Collider.width[eid],
 				Collider.height[eid],
-				world.text.get(
-					Text.id[eid]
-				)
+				text,
+				options
 			)
 
 			createImage(dataUrl).then(img => {
@@ -79,14 +87,10 @@ export default () => {
 				Sprite.spritesheet[eid] = spriteSheet
 				Sprite.scaleX[eid] = 1
 				Sprite.scaleY[eid] = 1
+			}).catch(err => {
+				removeEntity(world, eid)
 			})
 		}
-
-		// const entities = query(world)
-		// for (let i = 0; i < entities.length; i++) {
-		// 	const eid = entities[i]
-		// 	const text = world.text.get(Text.id[eid])
-		// }
 
 		return world
 	}

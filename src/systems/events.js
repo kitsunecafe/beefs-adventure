@@ -22,7 +22,6 @@ export default () => {
 				continue
 			}
 
-			console.log(eid, Event.id[eid], world.events)
 			events[Event.id[eid]].execute(world, eid)
 			removeEntity(world, eid)
 			removeEntity(world, contact.eid)

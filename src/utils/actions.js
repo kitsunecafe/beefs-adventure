@@ -7,7 +7,7 @@ export function Actions(input) {
 		},
 
 		get jump() {
-			return input.key[4].pressedThisFrame || input.key[2].pressedThisFrame
+			return input.key[6].pressedThisFrame || input.key[2].pressedThisFrame
 		},
 
 		get dash() {

@@ -16,6 +16,7 @@ export default (canvas) => {
   const spriteSheet = new SpriteSheetProxy(0)
   let rect = new Rectangle(0, 0, 0, 0)
   let viewport = new Rectangle(0, 0, 0, 0)
+  let f = true
 
   return world => {
     canvas.cls()
@@ -28,8 +29,10 @@ export default (canvas) => {
 
     const entities = spriteQuery(world)
 
-    for (let index = 0; index < entities.length; index++) {
-      const id = entities[index]
+    const sorted = Uint32Array.from(entities).sort((a, b) => Sprite.index[a] - Sprite.index[b])
+
+    for (let index = 0; index < sorted.length; index++) {
+      const id = sorted[index]
       position.eid = id
       rect.update(position.x, position.y, spriteSheet.frameWidth, spriteSheet.frameHeight)
 
@@ -43,8 +46,8 @@ export default (canvas) => {
       const xOffset = flipX ? halfWidth : 0
 
       canvas.trans(
-        (position.x + halfWidth + xOffset) - cameraPosition.x,
-        (position.y + halfHeight) - cameraPosition.y
+        (position.x + halfWidth + xOffset) - (cameraPosition.x * Position.px[id]),
+        (position.y + halfHeight) - (cameraPosition.y * Position.py[id])
       )
 
       canvas.rot(Sprite.rotation[id])

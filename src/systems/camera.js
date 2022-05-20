@@ -36,25 +36,41 @@ export default () => {
 
 			viewport.update(position.x, position.y, camera.width, camera.height)
 
-			// it's magic ¯\_(ツ)_/¯
-			const xFix = camera.width * 0.03
-			const yFix = camera.height * 1.445
-
-			if ((viewport.x - xFix) < world.bounds.x) {
-				position.x = world.bounds.x + xFix
+			if (viewport.x < world.bounds.x) {
+				position.x = world.bounds.x
 			}
 
 			if (viewport.y < world.bounds.y) {
 				position.y = world.bounds.y
 			}
 
-			if (viewport.xMax - xFix > world.bounds.xMax) {
-				position.x = world.bounds.xMax - (camera.width * 0.97)
+			if (viewport.xMax > world.bounds.xMax) {
+				position.x = world.bounds.xMax - camera.width
 			}
 
-			if (viewport.yMax + (camera.height * 0.445) > world.bounds.yMax) {
-				position.y = world.bounds.yMax - yFix
+			if (viewport.yMax > world.bounds.yMax) {
+				position.y = world.bounds.yMax - camera.height
 			}
+
+			// it's magic ¯\_(ツ)_/¯
+			// const xFix = camera.width * 0.03
+			// const yFix = camera.height * 1.445
+
+			// if ((viewport.x - xFix) < world.bounds.x) {
+			// 	position.x = world.bounds.x + xFix
+			// }
+
+			// if (viewport.y < world.bounds.y) {
+			// 	position.y = world.bounds.y
+			// }
+
+			// if (viewport.xMax - xFix > world.bounds.xMax) {
+			// 	position.x = world.bounds.xMax - (camera.width * 0.97)
+			// }
+
+			// if (viewport.yMax + (camera.height * 0.445) > world.bounds.yMax) {
+			// 	position.y = world.bounds.yMax - yFix
+			// }
 		}
 
 		return world

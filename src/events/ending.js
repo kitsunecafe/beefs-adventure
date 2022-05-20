@@ -83,6 +83,18 @@ export async function execute(world, eventId) {
 				128,
 				`You found ${Purse.value[player]} of them!!`
 			)
+
+			if (coins > 20) {
+				await timedText(
+					4 * 1000,
+					world,
+					Position.x[eventId] - 64,
+					Position.y[eventId] - 64,
+					128,
+					128,
+					'How did you even carry all these?'
+				)
+			}
 		}
 	}
 

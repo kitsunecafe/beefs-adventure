@@ -81,6 +81,7 @@ function render(state, dt) {
   state.world.time.elapsedFrames++
 
   state.renderSystems(state.world)
+  state.world.actions.update()
 }
 
 create()

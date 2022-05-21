@@ -2,7 +2,7 @@ import { addComponent, addEntity } from '../../static/js/bitecs.js'
 import { LoadLevel } from '../components/index.js'
 import { Actions } from '../utils/actions.js'
 import { loadBuffers } from '../utils/bufferloader.js'
-import Input from '../utils/device-input.js'
+import Input from '../utils/input.js'
 import { range, zip } from '../utils/helpers.js'
 import * as Events from '../events/index.js'
 import Store from '../utils/store.js'
@@ -35,7 +35,7 @@ export default () => {
 		)
 
 		// Input
-		world.actions = Actions(Input)
+		world.actions = Actions(Input(world.canvas.c, world.canvas.c.width, world.canvas.c.height))
 
 		// Text & strings
 		world.text = new Store(128)

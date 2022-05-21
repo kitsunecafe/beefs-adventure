@@ -10,7 +10,6 @@ export default () => {
 	const body = new BodyProxy(0)
 
 	return world => {
-		world.actions.tick()
 		const movement = world.actions.movement
 		const jump = world.actions.jump
 		const dash = world.actions.dash
@@ -25,14 +24,12 @@ export default () => {
 			intent.movement = movement * intent.speed
 
 			intent.dashed = 0
-			if (intent.jumped > 0 && body.grounded) {
-				intent.jumped = 0
-			}
 
 			intent.jump = jump ? -intent.jumpStrength : 0
 
 			if (body.facing !== 0) {
 				intent.dash = dash ? intent.dashStrength : 0
+
 				if (dash) {
 					createAudio(world, intent.dashAudio)
 				}

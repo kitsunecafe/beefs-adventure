@@ -280,7 +280,9 @@ export function createPlayer(world, spriteSheet, animations, x, y) {
   Intent.dashAudio[eid] = world.audioIDs.bark
   Intent.movement[eid] = 0
   Intent.jump[eid] = 0
+  Intent.jumpDelay[eid] = 0.1
   Intent.dash[eid] = 0
+  Intent.dashDelay[eid] = 0.1
 
   addComponent(world, ReceivesInput, eid)
   addComponent(world, Dynamic, eid)

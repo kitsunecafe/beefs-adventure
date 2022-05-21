@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-npx esbuild --bundle src/app.js --outdir=dist --minify --sourcemap
+mkdir dist/
 cp src/tc.js dist/
+cp src/game-shims.js dist/
+npx esbuild --bundle src/app.js --outdir=dist --minify --sourcemap

@@ -133,10 +133,11 @@ export default () => {
 			force.y = composite.velocity.y
 
 			Matter.Body.setVelocity(composite, force)
+			intent.jumpCooldown = Math.max(0, intent.jumpCooldown - world.time.delta)
+			intent.dashCooldown = Math.max(0, intent.dashCooldown - world.time.delta)
 
-			if (intent.jump != 0 && intent.jumped === 0 && body.grounded) {
-				console.log(intent.jumped, intent.jumped === 0)
-				intent.jumped = 1
+			if (intent.jump != 0 && intent.jumpCooldown <= 0 && body.grounded) {
+				intent.jumpCooldown = intent.jumpDelay
 				vector.x = position.x
 				vector.y = position.y
 
@@ -146,8 +147,8 @@ export default () => {
 				Matter.Body.applyForce(composite, vector, force)
 			}
 
-			if (intent.dash != 0 && intent.dashed === 0) {
-				intent.dashed = 1
+			if (intent.dash != 0 && intent.dashCooldown <= 0) {
+				intent.dashCooldown = intent.dashDelay
 				vector.x = position.x
 				vector.y = position.y
 

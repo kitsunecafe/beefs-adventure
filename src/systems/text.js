@@ -36,7 +36,6 @@ const defaultOptions = {
 const createTexture = (width, height, text, options) => {
 	const opts = Object.assign({}, defaultOptions, options)
 	const svg = createSvg(width, height, text, opts)
-	console.log(svg)
 	const encoded = encodeURIComponent(svg.replace(/\n/g, '').replace(/"/g, "'"))
 	return `data:image/svg+xml,${encoded}`
 }
@@ -65,7 +64,6 @@ export default () => {
 			const { text, options } = world.text.get(
 				Text.id[eid]
 			)
-			console.log(text, options)
 
 			const dataUrl = createTexture(
 				Collider.width[eid],

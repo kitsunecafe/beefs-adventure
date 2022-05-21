@@ -66,7 +66,6 @@ export const Input = (canvas, width, height) => {
 	})
 
 	window.addEventListener("mousedown", function (e) {
-		// console.log(btn, e)
 		var btn = e.button === 0 ? "leftMouse" : e.button === 1 ? "middleMouse" : "rightMouse"
 		if (!keys[btn]) {
 			keysDown[btn] = true

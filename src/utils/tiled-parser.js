@@ -83,14 +83,7 @@ export const getDimensions = (level, usePixels) => {
 		max
 	)(layers)
 	
-	console.log(x, y, w, h)
 	return new Rectangle(x, y, w, h)
-	/*
-			x = min(startx)
-			y = min(starty)
-			xMax = max(startX + width)
-			yMax = max(startY + height)
-	*/
 }
 
 const parseCustomProperties = pipe(

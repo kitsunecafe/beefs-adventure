@@ -15,6 +15,7 @@ export default () => {
 		const dash = world.actions.dash
 
 		query(world).forEach(id => {
+			console.log(id)
 			body.eid = intent.eid = id
 
 			if (movement !== 0) {

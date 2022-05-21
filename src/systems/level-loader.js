@@ -29,8 +29,7 @@ const loadLevel = canvas => async (world, level) => {
 	const dim = getDimensions(reqMap, true)
 	const boundsWidth = Math.max(canvas.c.width, dim.width)
 	const boundsHeight = Math.max(canvas.c.height, dim.height)
-	world.bounds = new Rectangle(dim.x + 16, -canvas.c.height / 2, boundsWidth + 16, boundsHeight)
-	console.log(world.bounds)
+	world.bounds = new Rectangle(dim.x + 16, dim.y, boundsWidth + 16, boundsHeight)
 
 	if (reqMap.backgroundColor) {
 		const color = hexToRGB(reqMap.backgroundColor)
@@ -171,8 +170,8 @@ const loadLevel = canvas => async (world, level) => {
 			const px = img.parallaxx || 1
 			const py = img.parallaxy || 1
 
-			const startx = px === 1 ? 0 : -1
-			const starty = py === 1 ? 0 : -1
+			const startx = px !== 1 && img.repeatx ? -1 : 0
+			const starty = py !== 1 && img.repeaty ? -1 : 0
 
 			for (let y = starty; y < county; y++) {
 				for (let x = startx; x < countx; x++) {

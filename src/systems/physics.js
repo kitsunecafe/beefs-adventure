@@ -1,10 +1,10 @@
 import { addEntity, addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from '../../static/js/bitecs.js'
 import Matter from '../../static/js/matter.min.js'
-import { Body, Collider, Contact, Dynamic, Intent, Translate, Player, Position, Sensor } from '../components/index.js'
+import { Body, Collider, Contact, Dynamic, Force, Intent, Translate, Player, Position, Sensor, Velocity } from '../components/index.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { BodyProxy } from '../proxies/body.js'
 import { PositionProxy } from '../proxies/vector2.js'
-import { IntentProxy } from "../proxies/intent.js"
+// import { IntentProxy } from "../proxies/intent.js"
 import Store from '../utils/store.js'
 import { ContactProxy } from '../proxies/contact.js'
 import { identity } from '../utils/helpers.js'
@@ -13,12 +13,12 @@ const Bodies = Matter.Bodies
 const Composite = Matter.Composite
 const Detector = Matter.Detector
 const Engine = Matter.Engine
-const Query = Matter.Query
 const Vector = Matter.Vector
 
 // https://github.com/liabru/matter-js/issues/5
-export default () => {
+export default (world) => {
 	const composites = new Store(128)
+	world.physics = { bodies: composites }
 
 	const engine = Engine.create()
 	const physicsWorld = engine.world
@@ -31,13 +31,13 @@ export default () => {
 
 	const contactQuery = defineQuery([Contact])
 	const dynamicQuery = defineQuery([Body, Collider, Dynamic])
-	const intentQuery = defineQuery([Body, Intent, Position])
 	const translationQuery = defineQuery([Translate, Position])
+	const velocityQuery = defineQuery([Velocity, Position])
+	const forceQuery = defineQuery([Force, Position])
 
 	const body = new BodyProxy(0)
 	const position = new PositionProxy(0)
 	const collider = new ColliderProxy(0)
-	const intent = new IntentProxy(0)
 	const contact = new ContactProxy(0)
 
 	let options = { isStatic: false, friction: 0, isSensor: 0 }
@@ -100,18 +100,33 @@ export default () => {
 			Detector.setBodies(detector, composites.items.filter(identity))
 		})
 
-		const bodies = composites.items.filter(identity)
-
-		dynamicQuery(world).forEach(id => {
-			collider.eid = body.eid = position.eid = id
-
+		velocityQuery(world).forEach(id => {
+			position.eid = body.eid = id
 			const composite = composites.get(body.index)
-			position.x = composite.position.x
-			position.y = composite.position.y
+
+			force.x = Velocity.x[id]
+			force.y = Velocity.y[id]
+
+			Matter.Body.setVelocity(composite, force)
+			removeComponent(world, Velocity, id)
+		})
+
+		forceQuery(world).forEach(id => {
+			body.eid = id
+			const composite = composites.get(body.index)
+
+			vector.x = position.x
+			vector.y = position.y
+
+			force.x = Force.x[id]
+			force.y = Force.y[id]
+
+			Matter.Body.applyForce(composite, vector, force)
+			removeComponent(world, Force, id)
 		})
 
 		translationQuery(world).forEach(id => {
-			position.eid = id
+			body.eid = id
 
 			const composite = composites.get(body.index)
 
@@ -120,65 +135,19 @@ export default () => {
 				y: Translate.y[id]
 			})
 
-			Matter.Body.setVelocity(composite, zero)
-
 			removeComponent(world, Translate, id)
 		})
 
-		intentQuery(world).forEach(id => {
-			intent.eid = body.eid = collider.eid = position.eid = id
+		Engine.update(engine, world.time.fixedDelta * 1000)
+
+		dynamicQuery(world).forEach(id => {
+			body.eid = position.eid = id
 
 			const composite = composites.get(body.index)
-			force.x = intent.movement
-			force.y = composite.velocity.y
-
-			Matter.Body.setVelocity(composite, force)
-			intent.jumpCooldown = Math.max(0, intent.jumpCooldown - world.time.delta)
-			intent.dashCooldown = Math.max(0, intent.dashCooldown - world.time.delta)
-
-			if (intent.jump != 0 && intent.jumpCooldown <= 0 && body.grounded) {
-				intent.jumpCooldown = intent.jumpDelay
-				vector.x = position.x
-				vector.y = position.y
-
-				force.x = 0
-				force.y = intent.jump
-
-				Matter.Body.applyForce(composite, vector, force)
-			}
-
-			if (intent.dash != 0 && intent.dashCooldown <= 0) {
-				intent.dashCooldown = intent.dashDelay
-				vector.x = position.x
-				vector.y = position.y
-
-				force.x = intent.dash * body.facing
-				force.y = 0
-
-				const end = Vector.add(vector, Vector.mult(force, 100))
-				const collisions = Query.ray(
-					bodies,
-					vector,
-					end
-				)
-					.filter(col => col.body.id !== composite.id && !col.body.isSensor)
-
-				let dashPosition = end
-
-				if (collisions.length > 0) {
-					const collision = collisions.map(col => col.body).reduce((prev, cur) => (
-						Math.abs(cur.position.x - vector.x) < Math.abs(prev.position.x - vector.x) ? cur : prev
-					))
-
-					const bounds = body.facing > 0 ? collision.bounds.min : collision.bounds.max
-					dashPosition.x = bounds.x
-				}
-
-				Matter.Body.setPosition(composite, dashPosition)
-			}
+			position.x = composite.position.x
+			position.y = composite.position.y
 		})
 
-		Engine.update(engine, world.time.fixedDelta * 1000)
 		return world
 	}
 }

@@ -106,6 +106,9 @@ export const roundF = (digit, number) => {
 	return Math.round(number * precision) / precision
 }
 
+export const add = y => x => x + y
+export const sub = y => x => x - y
 export const mul = y => x => x * y
+export const div = y => x => x / y
 export const max = nums => Math.max.apply(Math, nums)
 export const min = nums => Math.min.apply(Math, nums)

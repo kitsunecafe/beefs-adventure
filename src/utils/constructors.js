@@ -46,10 +46,8 @@ export function createObject(world, x, y, px, py) {
   return eid
 }
 
-export function createCollider(world, x, y, w, h, offsetX, offsetY) {
+export function createCollider(world, x, y, w, h) {
   const eid = createObject(world, x, y)
-  const ox = offsetX || 0
-  const oy = offsetY || 0
 
   addComponent(world, Collider, eid)
   Collider.width[eid] = w
@@ -71,7 +69,7 @@ export function createCamera(world, canvas, target) {
   Camera.height[eid] = canvas.height
 
   Camera.deadzoneX[eid] = canvas.width / 3
-  Camera.deadzoneY[eid] = canvas.height / 4 
+  Camera.deadzoneY[eid] = canvas.height / 4
 
   addComponent(world, Persistent, eid)
 

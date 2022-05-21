@@ -20,6 +20,7 @@ import resourceLoader from './systems/resource-loader.js'
 import levelLoader from './systems/level-loader.js'
 import eventSystem from './systems/events.js'
 import textSystem from './systems/text.js'
+import movementSystem from './systems/movement.js'
 
 import raf from './utils/raf.js'
 import { pipeAsync as pipe } from './utils/helpers.js'
@@ -45,7 +46,8 @@ async function create() {
       collectSystem(),
       checkpointSystem(),
       respawnSystem(),
-      physicsSystem(),
+      movementSystem(),
+      physicsSystem(world),
       groundCheckSystem(),
       warpSystem(),
       eventSystem()

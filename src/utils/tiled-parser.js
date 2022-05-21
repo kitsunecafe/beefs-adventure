@@ -72,13 +72,13 @@ export const getDimensions = (level, usePixels) => {
 	)(layers)
 
 	const w = pipe(
-		map(l => l.startx + l.width),
+		map(prop('width')),
 		map(mul(sx)),
 		max
 	)(layers)
 
 	const h = pipe(
-		map(l => l.starty + l.height),
+		map(prop('height')),
 		map(mul(sy)),
 		max
 	)(layers)

@@ -36,3 +36,4 @@ export const prop = key => obj => obj[key]
 export const hasProp = key => obj => obj && obj.hasOwnProperty(key)
 export const sleep = ms => new Promise(r => setTimeout(r, ms))
 export const thunk = fn => () => fn()
+export const times = length => fn => Array.from({ length }, (_, i) => fn(i))

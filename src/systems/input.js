@@ -15,7 +15,6 @@ export default () => {
 		const dash = world.actions.dash
 
 		query(world).forEach(id => {
-			console.log(id)
 			body.eid = intent.eid = id
 
 			if (movement !== 0) {
@@ -24,16 +23,10 @@ export default () => {
 
 			intent.movement = movement * intent.speed
 
-			intent.dashed = 0
-
 			intent.jump = jump ? -intent.jumpStrength : 0
 
 			if (body.facing !== 0) {
 				intent.dash = dash ? intent.dashStrength : 0
-
-				if (dash) {
-					createAudio(world, intent.dashAudio)
-				}
 			}
 		})
 

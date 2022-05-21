@@ -253,12 +253,12 @@
                  "x":96,
                  "y":0
                 }],
-         "height":32,
+         "height":80,
          "id":1,
          "name":"tiles",
          "opacity":1,
          "startx":0,
-         "starty":-16,
+         "starty":-64,
          "type":"tilelayer",
          "visible":true,
          "width":112,
@@ -270,17 +270,6 @@
          "id":2,
          "name":"colliders",
          "objects":[
-                {
-                 "height":16,
-                 "id":4,
-                 "name":"",
-                 "rotation":0,
-                 "type":"damageZone",
-                 "visible":true,
-                 "width":48,
-                 "x":304,
-                 "y":240
-                }, 
                 {
                  "height":96,
                  "id":5,
@@ -445,8 +434,7 @@
                  "width":16,
                  "x":816,
                  "y":32
-                },
-            
+                }, 
                 {
                  "height":16,
                  "id":39,
@@ -457,7 +445,8 @@
                  "width":16,
                  "x":784,
                  "y":64
-                }, 
+                },
+            
                 {
                  "height":16,
                  "id":40,
@@ -622,8 +611,7 @@
                  "width":48,
                  "x":1360,
                  "y":-64
-                },
-            
+                }, 
                 {
                  "height":16,
                  "id":73,
@@ -634,7 +622,8 @@
                  "width":48,
                  "x":1280,
                  "y":32
-                }, 
+                },
+            
                 {
                  "height":112,
                  "id":74,
@@ -805,8 +794,7 @@
                  "width":48,
                  "x":1568,
                  "y":208
-                },
-            
+                }, 
                 {
                  "height":48,
                  "id":89,
@@ -817,7 +805,8 @@
                  "width":96,
                  "x":1664,
                  "y":208
-                }, 
+                },
+            
                 {
                  "height":48,
                  "id":93,
@@ -922,6 +911,17 @@
                  "width":32,
                  "x":1296,
                  "y":96
+                }, 
+                {
+                 "height":16,
+                 "id":106,
+                 "name":"",
+                 "rotation":0,
+                 "type":"damageZone",
+                 "visible":true,
+                 "width":48,
+                 "x":304,
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -965,7 +965,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":106,
+ "nextobjectid":108,
  "orientation":"orthogonal",
  "properties":[
         {

@@ -134,7 +134,9 @@ export default () => {
 
 			Matter.Body.setVelocity(composite, force)
 
-			if (intent.jump != 0 && body.grounded) {
+			if (intent.jump != 0 && intent.jumped === 0 && body.grounded) {
+				console.log(intent.jumped, intent.jumped === 0)
+				intent.jumped = 1
 				vector.x = position.x
 				vector.y = position.y
 
@@ -144,7 +146,8 @@ export default () => {
 				Matter.Body.applyForce(composite, vector, force)
 			}
 
-			if (intent.dash != 0) {
+			if (intent.dash != 0 && intent.dashed === 0) {
+				intent.dashed = 1
 				vector.x = position.x
 				vector.y = position.y
 

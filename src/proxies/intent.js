@@ -21,6 +21,12 @@ export class IntentProxy extends BaseProxy {
 	get jump() { return this.store.jump[this.eid] }
 	set jump(val) { this.store.jump[this.eid] = val }
 
+	get jumped() { return this.store.jumped[this.eid] }
+	set jumped(val) { this.store.jumped[this.eid] = val }
+
 	get dash() { return this.store.dash[this.eid] }
 	set dash(val) { this.store.dash[this.eid] = val }
+
+	get dashed() { return this.store.dashed[this.eid] }
+	set dashed(val) { this.store.dashed[this.eid] = val }
 }

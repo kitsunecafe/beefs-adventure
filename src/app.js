@@ -30,7 +30,7 @@ async function create() {
   const world = createWorld()
   world.time = { fixedDelta: 0, delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
-  world.levels = ['level-1.tmj', 'mountain.tmj', 'level-3.tmj', 'end.tmj', 'level-1-inf.tmj']
+  world.levels = ['level-1-inf.tmj', 'level-1.tmj', 'mountain.tmj', 'level-3.tmj', 'end.tmj']
 
   const state = {
     canvas,
@@ -40,8 +40,6 @@ async function create() {
     ),
     updateSystems: pipe(
       levelLoader(canvas),
-      // statsSystem(),
-      inputSystem(),
       spritesheetSystem(),
       colliderSystem(),
       collectSystem(),
@@ -53,6 +51,8 @@ async function create() {
       eventSystem()
     ),
     renderSystems: pipe(
+      statsSystem(),
+      inputSystem(),
       audioSystem(world.audioContext),
       animationSystem(),
       animatorSystem(),

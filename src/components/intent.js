@@ -8,5 +8,7 @@ export const Intent = defineComponent({
 	dashAudio: Types.ui8,
 	movement: Types.f32,
 	jump: Types.f32,
-	dash: Types.f32
+	jumped: Types.ui8,
+	dash: Types.f32,
+	dashed: Types.ui8
 })

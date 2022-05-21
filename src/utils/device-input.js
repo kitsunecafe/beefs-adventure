@@ -62,7 +62,10 @@ export const Input = {
 	},
 
 	tick() {
-		this.key.forEach(k => k.tick())
+		this.key.forEach((k, i) => {
+			// if (i === 7) console.log('ticking', k, i)
+			k.tick()
+		})
 
 		// We're only interested in one gamepad, which is the first.
 		Input.gamepad = navigator.webkitGetGamepads && navigator.webkitGetGamepads()[0]

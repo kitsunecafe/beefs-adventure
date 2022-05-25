@@ -2,7 +2,6 @@ import { defineQuery } from '../../static/js/bitecs.js'
 import { Body, Intent, ReceivesInput } from '../components/index.js'
 import { BodyProxy } from '../proxies/body.js'
 import { IntentProxy } from "../proxies/intent.js"
-import { createAudio } from '../utils/constructors.js'
 
 export default () => {
 	const query = defineQuery([Body, ReceivesInput, Intent])

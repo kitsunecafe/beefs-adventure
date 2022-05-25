@@ -12,7 +12,6 @@ import physicsSystem from './systems/physics.js'
 import statsSystem from './systems/stats.js'
 import collectSystem from './systems/collect.js'
 import groundCheckSystem from './systems/ground-check.js'
-import warpSystem from './systems/warp.js'
 import removalSystem from './systems/removal.js'
 import checkpointSystem from './systems/checkpoint.js'
 import respawnSystem from './systems/respawn.js'
@@ -21,6 +20,7 @@ import levelLoader from './systems/level-loader.js'
 import eventSystem from './systems/events.js'
 import textSystem from './systems/text.js'
 import movementSystem from './systems/movement.js'
+import oneWayCollisions from './systems/one-way-collisions.js'
 
 import raf from './utils/raf.js'
 import { pipeAsync as pipe } from './utils/helpers.js'
@@ -31,7 +31,7 @@ async function create() {
   const world = createWorld()
   world.time = { fixedDelta: 0, delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
-  world.levels = ['level-1-inf.tmj', 'level-1.tmj', 'mountain.tmj', 'level-3.tmj', 'end.tmj', 'cave.tmj']
+  world.levels = ['level-1-inf.tmj', 'mountain.tmj', 'cloud.tmj', 'end.tmj', 'cave.tmj', 'ice.tmj']
 
   const state = {
     canvas,
@@ -47,10 +47,11 @@ async function create() {
       checkpointSystem(),
       respawnSystem(),
       movementSystem(),
+      oneWayCollisions(),
       physicsSystem(world),
       groundCheckSystem(),
-      warpSystem(),
-      eventSystem()
+      // warpSystem(),
+      eventSystem(),
     ),
     renderSystems: pipe(
       statsSystem(),

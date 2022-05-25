@@ -1,6 +1,6 @@
 import { addComponent, addEntity, defineQuery, hasComponent, removeEntity } from '../../static/js/bitecs.js'
 import Matter from '../../static/js/matter.min.js'
-import { Body, Force, Intent, Position, Remove, Sprite, Translate, Velocity } from '../components/index.js'
+import { Body, Force, Intent, PhysicsObject, Position, Remove, Sprite, Translate, Velocity } from '../components/index.js'
 import { BodyProxy } from '../proxies/body.js'
 import { ColliderProxy } from '../proxies/collider.js'
 import { IntentProxy } from '../proxies/intent.js'
@@ -15,7 +15,7 @@ const Vector = Matter.Vector
 const timesR = fn => n => times(n)(fn)
 
 export default () => {
-	const query = defineQuery([Body, Intent, Position])
+	const query = defineQuery([Body, Intent, Position, PhysicsObject])
 
 	const body = new BodyProxy(0)
 	const position = new PositionProxy(0)
@@ -25,6 +25,7 @@ export default () => {
 
 	const vector = Vector.create()
 	const force = Vector.create()
+	let moved = false
 
 	return world => {
 		const entities = query(world)
@@ -36,7 +37,8 @@ export default () => {
 			const composite = world.physics.bodies.get(body.index)
 			if (!composite) continue
 
-			if (intent.movement != composite.velocity.x) {
+			moved = intent.movement != composite.velocity.x
+			if (moved) {
 				addComponent(world, Velocity, eid)
 				Velocity.x[eid] = intent.movement
 				Velocity.y[eid] = composite.velocity.y
@@ -47,6 +49,13 @@ export default () => {
 
 			if (intent.jump != 0 && intent.jumpCooldown <= 0 && body.grounded) {
 				intent.jumpCooldown = intent.jumpDelay
+				body.rising = 1
+
+				if (!moved) {
+					addComponent(world, Velocity, eid)
+				}
+
+				Velocity.y[eid] = 0
 
 				addComponent(world, Force, eid)
 				Force.x[eid] = 0

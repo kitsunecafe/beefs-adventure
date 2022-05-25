@@ -6,4 +6,4 @@ export const Animation = defineComponent({
 	frameDuration: Types.ui8,
 	firstFrame: Types.ui16,
 	loop: Types.ui8
-})
+}, 256)

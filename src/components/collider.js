@@ -1,11 +1,9 @@
 import { defineComponent, Types } from '../../static/js/bitecs.js'
+import { Dimensions, Vector2 } from './types.js'
 
 export const Collider = defineComponent({
-	x: Types.f32,
-	y: Types.f32,
+	...Vector2,
+	...Dimensions,
 	offsetX: Types.f32,
-	offsetY: Types.f32,
-	width: Types.f32,
-	height: Types.f32
-})
-
+	offsetY: Types.f32
+}, 1024)

@@ -5,4 +5,4 @@ export const Contact = defineComponent({
 	b: Types.eid,
 	normalX: Types.f32,
 	normalY: Types.f32
-})
+}, 256)

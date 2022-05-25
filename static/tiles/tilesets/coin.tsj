@@ -36,7 +36,7 @@
                  "tileid":5
                 }],
          "id":0,
-         "type":"coin-spin"
+         "type":"spin"
         }, 
         {
          "animation":[
@@ -57,7 +57,7 @@
                  "tileid":11
                 }],
          "id":8,
-         "type":"coin-collect"
+         "type":"collect"
         }],
  "tilewidth":8,
  "type":"tileset",

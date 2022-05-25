@@ -2,7 +2,6 @@ import { addComponent, defineQuery, hasComponent, removeComponent, removeEntity 
 import { Animation, Coin, CoinAnimation, CurrentAnimation, Contact, Remove, Purse, Sprite } from '../components/index.js'
 import { ContactProxy } from '../proxies/contact.js'
 import { createAudio } from '../utils/constructors.js'
-import { roundF } from '../utils/math.js'
 
 export default () => {
 	const query = defineQuery([Contact])

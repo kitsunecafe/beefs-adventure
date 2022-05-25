@@ -1,6 +1,4 @@
-import { defineComponent, Types } from '../../static/js/bitecs.js'
+import { defineComponent } from '../../static/js/bitecs.js'
+import { Vector2 } from './types.js'
 
-export const Force = defineComponent({
-	x: Types.f32,
-	y: Types.f32
-})
+export const Force = defineComponent(Vector2, 64)

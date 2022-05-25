@@ -1,6 +1,8 @@
 export * as JumpInfo from './jump-info.js'
 export * as DashInfo from './dash-info.js'
+export * as OpenDoor from './open-door.js'
 export * as JumpDashInfo from './jump-dash-info.js'
 export * as CoinInfo from './coin-info.js'
 export * as CheckpointInfo from './checkpoint-info.js'
 export * as Ending from './ending.js'
+export * as Warp from './warp.js'

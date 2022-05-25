@@ -23,6 +23,7 @@ export const tap = fn => val => {
 	return val
 }
 
+export const concat = b => a => a.concat(b)
 export const flat = depth => iter => isNull(iter) ? [] : iter.flat(depth)
 export const filter = fn => iter => isNull(iter) ? [] : iter.filter(fn)
 export const map = fn => iter => isNull(iter) ? [] : iter.map(fn)
@@ -37,3 +38,26 @@ export const hasProp = key => obj => obj && obj.hasOwnProperty(key)
 export const sleep = ms => new Promise(r => setTimeout(r, ms))
 export const thunk = fn => () => fn()
 export const times = length => fn => Array.from({ length }, (_, i) => fn(i))
+export const sort = arr => arr.sort()
+export const assign = (...args) => Object.assign({}, ...args)
+
+export const uniq = pipe(
+	sort,
+	filter((item, pos, arr) => !pos || item !== arr[pos - 1])
+)
+
+export const uniqBy = fn => iter => {
+	let seen = new Set()
+	return iter.filter(item => {
+		let k = fn(item)
+		return seen.has(k) ? false : seen.add(k)
+	})
+}
+
+export const groupBy = fn => xs => {
+	return xs.reduce((acc, x) => {
+		const key = fn(x)
+		acc[key] = (acc[key] || []).concat(x)
+		return acc
+	}, {})
+}

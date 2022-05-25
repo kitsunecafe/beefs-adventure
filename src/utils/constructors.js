@@ -1,79 +1,59 @@
-import { addComponent, addEntity } from '../../static/js/bitecs.js'
-import {
-  Animation,
-  Audio,
-  Body,
-  Camera,
-  Checkpoint,
-  Collider,
-  Coin,
-  CoinAnimation,
-  CurrentAnimation,
-  DamageZone,
-  Dynamic,
-  EntityAnimation,
-  Event,
-  Intent,
-  LastCheckpoint,
-  Persistent,
-  Player,
-  Position,
-  ReceivesInput,
-  Sensor,
-  Sprite,
-  SpriteSheet,
-  Text,
-  Purse,
-  Warp
-} from '../components/index.js'
+import { addComponent, addEntity, hasComponent } from '../../static/js/bitecs.js'
+import { Camera } from '../archetypes/camera.js'
+import { Coin } from '../archetypes/coin.js'
+import { Collider, Event, Sensor } from '../archetypes/collider.js'
+import { Player } from '../archetypes/player.js'
+import { Sprite } from '../archetypes/sprite.js'
+import * as Component from '../components/index.js'
+import { createArchetype, setValues } from './archetype.js'
+import { hasProp, pipe } from './helpers.js'
+
+const eqType = type => obj => obj.type === type
 
 export const addPosition = (world, x, y) => id => {
-  addComponent(world, Position, id)
-  Position.x[id] = x
-  Position.y[id] = y
+  addComponent(world, Component.Position, id)
+  Component.Position.x[id] = x
+  Component.Position.y[id] = y
   return id
 }
 
 export function createObject(world, x, y, px, py) {
   const eid = addEntity(world)
 
-  addComponent(world, Position, eid)
-  Position.x[eid] = x
-  Position.y[eid] = y
-  Position.px[eid] = px || 1
-  Position.py[eid] = py || 1
+  addComponent(world, Component.Position, eid)
+  Component.Position.x[eid] = x
+  Component.Position.y[eid] = y
+  Component.Position.px[eid] = px || 1
+  Component.Position.py[eid] = py || 1
 
   return eid
 }
 
-export function createCollider(world, x, y, w, h) {
-  const eid = createObject(world, x, y)
+export function createCollider(world, x, y, width, height, oneWay) {
+  const eid = pipe(
+    createArchetype(world),
+    setValues(Component.Position, { x, y }),
+    setValues(Component.Collider, { width, height })
+  )(Collider)
 
-  addComponent(world, Collider, eid)
-  Collider.width[eid] = w
-  Collider.height[eid] = h
-
-  addComponent(world, Body, eid)
-  Body.mass[eid] = 1
+  if (oneWay) {
+    addComponent(world, Component.OneWayCollider, eid)
+  }
 
   return eid
 }
 
 export function createCamera(world, canvas, target) {
-  const eid = createObject(world, 0, 0)
-
-  addComponent(world, Camera, eid)
-  Camera.following[eid] = target
-
-  Camera.width[eid] = canvas.width
-  Camera.height[eid] = canvas.height
-
-  Camera.deadzoneX[eid] = canvas.width / 3
-  Camera.deadzoneY[eid] = canvas.height / 4
-
-  addComponent(world, Persistent, eid)
-
-  return eid
+  return pipe(
+    createArchetype(world),
+    setValues(Component.Camera, {
+      following: target,
+      width: canvas.width,
+      height: canvas.height,
+      deadzoneX: canvas.width / 3,
+      deadzoneY: canvas.height / 4
+    })
+  )(Camera)
 }
 
 const defaultAudioOptions = {
@@ -83,20 +63,20 @@ const defaultAudioOptions = {
 export function createAudio(world, audio, options) {
   const opts = Object.assign({}, defaultAudioOptions, options)
   const eid = addEntity(world)
-  addComponent(world, Audio, eid)
-  Audio.id[eid] = audio
-  Audio.loop[eid] = opts.loop ? 1 : 0
+  addComponent(world, Component.Audio, eid)
+  Component.Audio.id[eid] = audio
+  Component.Audio.loop[eid] = opts.loop ? 1 : 0
   return eid
 }
 
 export function createAnimation(world, frames, duration, first, loop) {
   const eid = addEntity(world)
 
-  addComponent(world, Animation, eid)
-  Animation.frames[eid] = frames
-  Animation.frameDuration[eid] = duration
-  Animation.firstFrame[eid] = first || 0
-  Animation.loop[eid] = loop == undefined || loop ? 1 : 0
+  addComponent(world, Component.Animation, eid)
+  Component.Animation.frames[eid] = frames
+  Component.Animation.frameDuration[eid] = duration
+  Component.Animation.firstFrame[eid] = first || 0
+  Component.Animation.loop[eid] = loop == undefined || loop ? 1 : 0
 
   return eid
 }
@@ -110,17 +90,18 @@ export function createSpriteSheet(world, texture, options) {
   const opts = Object.assign({}, defaultSpriteSheetOptions, options)
   const eid = addEntity(world)
 
-  addComponent(world, SpriteSheet, eid)
-  SpriteSheet.texture[eid] = texture
-  SpriteSheet.frameWidth[eid] = opts.frameWidth
-  SpriteSheet.frameHeight[eid] = opts.frameHeight
-  SpriteSheet.offsetX[eid] = opts.offsetX
-  SpriteSheet.offsetY[eid] = opts.offsetY
+  addComponent(world, Component.SpriteSheet, eid)
+  Component.SpriteSheet.texture[eid] = texture
+  Component.SpriteSheet.frameWidth[eid] = opts.frameWidth
+  Component.SpriteSheet.frameHeight[eid] = opts.frameHeight
+  Component.SpriteSheet.offsetX[eid] = opts.offsetX
+  Component.SpriteSheet.offsetY[eid] = opts.offsetY
 
   return eid
 }
 
 const defaultSpriteOptions = {
+  id: 0,
   px: 1,
   py: 1,
   rotation: 0,
@@ -129,55 +110,64 @@ const defaultSpriteOptions = {
   index: 0
 }
 
-export function createSprite(world, spriteSheet, tile, x, y, options) {
+export function createSprite(world, spritesheet, frame, x, y, options) {
   const opts = Object.assign({}, defaultSpriteOptions, options)
 
-  const eid = addEntity(world)
-  addComponent(world, Position, eid)
-  Position.x[eid] = x - (SpriteSheet.frameWidth[eid] / 2)
-  Position.y[eid] = y - (SpriteSheet.frameHeight[eid] / 2)
-  Position.px[eid] = opts.px
-  Position.py[eid] = opts.py
+  return pipe(
+    createArchetype(world),
+    setValues(Component.ID, { value: opts.id }),
+    setValues(Component.Position, { x, y, px: opts.px, py: opts.py}),
+    setValues(Component.Sprite, {
+      spritesheet,
+      frame,
+      rotation: opts.rotation,
+      scaleX: opts.scaleX,
+      scaleY: opts.scaleY,
+      index: opts.index
+    })
+  )(Sprite)
+}
 
-  addComponent(world, Body, eid)
-  Body.mass[eid] = 1
+export function createSensor(world, x, y, width, height) {
+  return pipe(
+    createArchetype(world),
+    setValues(Component.Position, { x, y }),
+    setValues(Component.Collider, { width, height })
+  )(Sensor)
+}
 
-  addComponent(world, Sprite, eid)
-  Sprite.spritesheet[eid] = spriteSheet
-  Sprite.frame[eid] = tile
-  Sprite.rotation[eid] = opts.rotation
-  Sprite.scaleX[eid] = opts.scaleX
-  Sprite.scaleY[eid] = opts.scaleY
-  Sprite.index[eid] = opts.index
+export function createCheckpoint(world, x, y, width, height) {
+  const eid = pipe(
+    createArchetype(world),
+    setValues(Component.Position, { x, y }),
+    setValues(Component.Collider, { width, height }),
+  )(Sensor)
 
+  addComponent(world, Component.Checkpoint, eid)
   return eid
 }
 
-export function createSensor(world, x, y, w, h) {
-  const eid = createCollider(world, x, y, w, h)
-  addComponent(world, Sensor, eid)
+export function createDamageZone(world, x, y, width, height) {
+  const eid = pipe(
+    createArchetype(world),
+    setValues(Component.Position, { x, y }),
+    setValues(Component.Collider, { width, height }),
+  )(Sensor)
+
+  addComponent(world, Component.DamageZone, eid)
   return eid
 }
 
-export function createCheckpoint(world, x, y, w, h) {
-  const eid = createSensor(world, x, y, w, h)
-  addComponent(world, Checkpoint, eid)
-  return eid
-}
+export function createEvent(world, x, y, width, height, eventName, references) {
+  const id = Object.values(world.events).findIndex(evt => evt.name === eventName)
 
-export function createDamageZone(world, x, y, w, h) {
-  const eid = createSensor(world, x, y, w, h)
-  addComponent(world, DamageZone, eid)
-  return eid
-}
-
-export function createEvent(world, x, y, w, h, eventName) {
-  const event = Object.values(world.events).findIndex(evt => evt.name === eventName)
-
-  if (event >= 0) {
-    const eid = createSensor(world, x, y, w, h)
-    addComponent(world, Event, eid)
-    Event.id[eid] = event
+  if (id >= 0) {
+    const eid = pipe(
+      createArchetype(world),
+      setValues(Component.Position, { x, y }),
+      setValues(Component.Collider, { width, height }),
+      setValues(Component.Event, { id, references })
+    )(Event)
 
     return eid
   }
@@ -185,15 +175,14 @@ export function createEvent(world, x, y, w, h, eventName) {
   return -1
 }
 
-export function createText(world, x, y, w, h, text, options) {
-  const eid = createObject(world, x, y)
+export function createText(world, x, y, width, height, text, options) {
+  const eid = createSensor(world, x, y, width, height)
 
-  addComponent(world, Collider, eid)
-  Collider.width[eid] = w
-  Collider.height[eid] = h
-
-  addComponent(world, Text, eid)
-  Text.id[eid] = world.text.add({ text, options: Object.assign({}, options) })
+  addComponent(world, Component.Text, eid)
+  Component.Text.id[eid] = world.text.add({
+    text,
+    options: Object.assign({}, options)
+  })
 
   return eid
 }
@@ -202,92 +191,51 @@ export function createWarp(world, x, y, w, h, level) {
   const levelID = world.levels.findIndex(name => name === level)
 
   if (levelID >= 0) {
-    const eid = createCollider(world, x, y, w, h)
-    addComponent(world, Warp, eid)
-    Warp.id[eid] = levelID
-    addComponent(world, Sensor, eid)
-    return eid
+    const eid = createEvent(world, x, y, w, h, 'warp')
+    if (eid > -1) {
+      addComponent(world, Component.Warp, eid)
+      Component.Warp.id[eid] = levelID
+
+      return eid
+    }
   }
 
   return -1
 }
 
-export function createCoin(world, spriteSheet, animations) {
-  const anims = Object.values(animations)
+export function createCoin(world, spritesheet, animations, x, y, width, height, offsetX, offsetY) {
+  const spin = animations.spin.eid
+  const collect = animations.collect.eid
+  const position = { x, y }
 
-  const spin = anims.find(anim => anim.type === 'coin-spin').eid
-  const collect = anims.find(anim => anim.type === 'coin-collect').eid
-
-  const w = SpriteSheet.frameWidth[spriteSheet]
-  const h = SpriteSheet.frameHeight[spriteSheet]
-
-  return (x, y) => {
-    const eid = createSprite(world, spriteSheet, 0, x + w, y)
-
-    addComponent(world, Collider, eid)
-    Collider.width[eid] = w
-    Collider.height[eid] = h
-    Collider.offsetX[eid] = w
-    Collider.offsetY[eid] = h
-
-    addComponent(world, CoinAnimation, eid)
-    CoinAnimation.spin[eid] = spin
-    CoinAnimation.collect[eid] = collect
-
-    addComponent(world, CurrentAnimation, eid)
-    CurrentAnimation.id[eid] = spin
-
-    addComponent(world, Coin, eid)
-    Coin.audio[eid] = world.audioIDs.coin
-
-    addComponent(world, Sensor, eid)
-
-    return eid
-  }
+  return pipe(
+    createArchetype(world),
+    setValues(Component.Position, position),
+    setValues(Component.Collider, { ...position, width, height, offsetX, offsetY }),
+    setValues(Component.Sprite, { spritesheet, index: 1 }),
+    setValues(Component.CoinAnimation, { spin, collect }),
+    setValues(Component.CurrentAnimation, { id: spin }),
+    setValues(Component.Coin, { audio: world.audioIDs.coin })
+  )(Coin)
 }
 
-export function createPlayer(world, spriteSheet, animations, x, y) {
-  const anims = Object.values(animations)
-  const idle = anims.find(anim => anim.type === 'dog-idle').eid
-  const walk = anims.find(anim => anim.type === 'dog-walk').eid
+export function createPlayer(world, spritesheet, animations, id, x, y, width, height) {
+  const idle = animations.idle.eid
+  const walk = animations.walk.eid
 
-  const w = SpriteSheet.frameWidth[spriteSheet]
-  const h = SpriteSheet.frameHeight[spriteSheet]
+  const position = {
+    x: x - width / 2,
+    y: y - height / 2
+  }
 
-  const eid = createCollider(world, x - (w / 2), y - (h / 2), w, h)
-
-  addComponent(world, Sprite, eid)
-  Sprite.spritesheet[eid] = spriteSheet
-  Sprite.frame[eid] = 0
-  Sprite.rotation[eid] = 0
-  Sprite.scaleX[eid] = 1
-  Sprite.scaleY[eid] = 1
-  Sprite.index[eid] = 1
-
-  addComponent(world, EntityAnimation, eid)
-  EntityAnimation.idle[eid] = idle
-  EntityAnimation.walk[eid] = walk
-
-  addComponent(world, CurrentAnimation, eid)
-  CurrentAnimation.id[eid] = idle
-
-  addComponent(world, Intent, eid)
-  Intent.speed[eid] = 1.5
-  Intent.jumpStrength[eid] = 0.017
-  Intent.dashStrength[eid] = 0.65
-  Intent.dashAudio[eid] = world.audioIDs.bark
-  Intent.movement[eid] = 0
-  Intent.jump[eid] = 0
-  Intent.jumpDelay[eid] = 0.1
-  Intent.dash[eid] = 0
-  Intent.dashDelay[eid] = 0.1
-
-  addComponent(world, ReceivesInput, eid)
-  addComponent(world, Dynamic, eid)
-  addComponent(world, Player, eid)
-  addComponent(world, Purse, eid)
-  addComponent(world, Persistent, eid)
-  addComponent(world, LastCheckpoint, eid)
-
-  return eid
+  return pipe(
+    createArchetype(world),
+    setValues(Component.ID, { value: id }),
+    setValues(Component.Position, position),
+    setValues(Component.Collider, { width, height }),
+    setValues(Component.Sprite, { spritesheet, index: 1 }),
+    setValues(Component.EntityAnimation, { idle, walk }),
+    setValues(Component.CurrentAnimation, { id: idle }),
+    setValues(Component.Intent, { dashAudio: world.audioIDs.bark })
+  )(Player)
 }

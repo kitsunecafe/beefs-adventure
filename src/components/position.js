@@ -1,8 +1,8 @@
 import { defineComponent, Types } from '../../static/js/bitecs.js'
+import { Vector2 } from './types.js'
 
 export const Position = defineComponent({
-	x: Types.f32,
-	y: Types.f32,
+	...Vector2,
 	px: Types.f32,
 	py: Types.f32
-})
+}, 1024)

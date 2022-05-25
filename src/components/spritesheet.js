@@ -8,4 +8,4 @@ export const SpriteSheet = defineComponent({
 	rows: Types.ui8,
 	offsetX: Types.ui16,
 	offsetY: Types.ui16
-})
+}, 64)

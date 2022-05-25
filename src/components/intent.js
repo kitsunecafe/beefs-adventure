@@ -15,4 +15,4 @@ export const Intent = defineComponent({
 	dashed: Types.ui8,
 	dashDelay: Types.f32,
 	dashCooldown: Types.f32
-})
+}, 32)

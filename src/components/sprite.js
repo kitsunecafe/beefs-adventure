@@ -7,4 +7,4 @@ export const Sprite = defineComponent({
 	scaleX: Types.i8,
 	scaleY: Types.i8,
 	index: Types.ui8
-})
+}, 1024)

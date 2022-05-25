@@ -24,7 +24,13 @@
                  "tileid":2
                 }],
          "id":0,
-         "type":"dog-idle"
+         "properties":[
+                {
+                 "name":"parent",
+                 "type":"string",
+                 "value":"dog"
+                }],
+         "type":"idle"
         }, 
         {
          "animation":[
@@ -41,7 +47,13 @@
                  "tileid":5
                 }],
          "id":3,
-         "type":"dog-walk"
+         "properties":[
+                {
+                 "name":"parent",
+                 "type":"string",
+                 "value":"dog"
+                }],
+         "type":"walk"
         }],
  "tilewidth":16,
  "type":"tileset",

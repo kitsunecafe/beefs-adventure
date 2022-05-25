@@ -1,10 +1,14 @@
 import { addComponent, defineQuery, Not, removeEntity } from '../../static/js/bitecs.js'
 import { getTileSetImageSources, getImageLayerSources, loadMap, parseMap, parseAnimations, clearFlags, getDimensions } from '../utils/tiled-parser.js'
-import { createAnimation, createAudio, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createEvent, createPlayer, createSprite, createSpriteSheet, createText, createWarp } from '../utils/constructors.js'
-import { hasProp, prop, createImage, map, mapObj, pipe, range, zip, isNull } from '../utils/helpers.js'
+import { createAnimation, createAudio, createCamera, createCheckpoint, createCoin, createCollider, createDamageZone, createEvent, createPlayer, createSprite, createSpriteSheet, createWarp } from '../utils/constructors.js'
+import { hasProp, prop, createImage, map, mapObj, pipe, range, zip, isNull, tap, groupBy } from '../utils/helpers.js'
 import { Rectangle } from '../utils/rectangle.js'
-import { CurrentAnimation, LoadLevel, Persistent, Translate, Sprite, SpriteSheet } from '../components/index.js'
+import * as Component from '../components/index.js'
 import { hexToRGB } from '../utils/color.js'
+import Store from '../utils/store.js'
+import { addArchetype, setValues } from '../utils/archetype.js'
+import { Sprite } from '../archetypes/sprite.js'
+import { toCartesian } from '../utils/math.js'
 
 const loadImages = map => {
 	const keys = Object.keys(map)
@@ -12,7 +16,7 @@ const loadImages = map => {
 	return Promise.all(Object.values(map).map(createImage)).then(zip.bind(null, keys))
 }
 
-const allEntitiesQuery = defineQuery([Not(Persistent)])
+const allEntitiesQuery = defineQuery([Not(Component.Persistent)])
 const removeAllEntities = world => {
 	const entities = allEntitiesQuery(world)
 	for (let i = 0; i < entities.length; i++) {
@@ -29,7 +33,7 @@ const loadLevel = canvas => async (world, level) => {
 	const dim = getDimensions(reqMap, true)
 	const boundsWidth = Math.max(canvas.c.width, dim.width)
 	const boundsHeight = Math.max(canvas.c.height, dim.height)
-	world.bounds = new Rectangle(dim.x + 16, dim.y, boundsWidth + 16, boundsHeight)
+	world.bounds = new Rectangle(dim.x + 16, dim.y, boundsWidth, boundsHeight)
 
 	if (reqMap.backgroundColor) {
 		const color = hexToRGB(reqMap.backgroundColor)
@@ -59,6 +63,10 @@ const loadLevel = canvas => async (world, level) => {
 		Object.fromEntries
 	)(reqMap.tileSets)
 
+	reqMap.tileSets.forEach(ts => {
+		ts.eid = tileSetSpriteSheets[ts.name]
+	})
+
 	const imageSpriteSheets = mapObj(
 		([name, image]) => ([
 			name,
@@ -76,8 +84,14 @@ const loadLevel = canvas => async (world, level) => {
 			...anim,
 			eid: createAnimation(world, anim.length, anim.duration, anim.firstFrame)
 		})),
-		map(anim => [anim.gid, anim]),
-		Object.fromEntries
+		groupBy(anim => anim.tileSet.name),
+		mapObj(([key, val]) => ([
+			key,
+			pipe(
+				groupBy(anim => anim.type || anim.gid),
+				mapObj(([key, val]) => ([key, val[0]]))
+			)(val)
+		])),
 	)(reqMap)
 
 	if (reqMap.bgm) {
@@ -91,7 +105,7 @@ const loadLevel = canvas => async (world, level) => {
 		return reqMap.tileSets.find(ts => id >= ts.firstgid && id <= ts.lastgid)
 	}
 
-	let coinFactory
+	world.events.references = new Store(128)
 
 	loadMap(
 		reqMap,
@@ -102,64 +116,126 @@ const loadLevel = canvas => async (world, level) => {
 			if (!spriteSheet) return
 
 			const sseid = spriteSheets[spriteSheet.name]
+			const anims = animations[spriteSheet.name]
+
 			const cGid = clearFlags(tile)
 			const gid = cGid - spriteSheet.firstgid
 
-			const eid = createSprite(
-				world,
-				sseid,
-				gid,
-				(position.x * spriteSheet.tileWidth) + (spriteSheet.tileWidth / 2),
-				(position.y * spriteSheet.tileHeight) + (spriteSheet.tileHeight / 2),
-			)
+			const x = (position.x * spriteSheet.tileWidth) + (spriteSheet.tileWidth / 2)
+			const y = (position.y * spriteSheet.tileHeight) + (spriteSheet.tileHeight / 2)
 
-			if (hasProp(cGid)(animations)) {
-				addComponent(world, CurrentAnimation, eid)
-				const anim = prop(cGid)(animations)
-				CurrentAnimation.id[eid] = anim.eid
+			const eid = createSprite(world, sseid, gid, x, y)
+
+			if (hasProp(cGid)(anims)) {
+				addComponent(world, Component.CurrentAnimation, eid)
+				const anim = prop(cGid)(anims)
+				Component.CurrentAnimation.id[eid] = anim.eid
 			}
 		},
 		(obj) => {
 			const spriteSheet = getSpriteSheet(obj.gid)
-
 			if (obj.type === 'playerSpawn') {
-					const sseid = spriteSheets[spriteSheet.name]
-				if (isNull(world.player)) {
-					const eid = createPlayer(world, sseid, animations, obj.x, obj.y)
-					world.player = eid
+				const sseid = spriteSheets[spriteSheet.name]
 
-					createCamera(world, canvas.c, eid)
+				if (isNull(world.player)) {
+					const anims = animations[spriteSheet.name]
+
+					world.player = createPlayer(
+						world,
+						sseid,
+						anims,
+						obj.id,
+						obj.x,
+						obj.y,
+						spriteSheet.tileWidth,
+						spriteSheet.tileHeight
+					)
+
+					createCamera(world, canvas.c, world.player)
 				} else {
-					Sprite.spritesheet[world.player] = sseid
-					addComponent(world, Translate, world.player)
-					Translate.x[world.player] = obj.x
-					Translate.y[world.player] = obj.y
+					Component.Sprite.spritesheet[world.player] = sseid
+
+					addComponent(world, Component.Translate, world.player)
+					Component.Translate.x[world.player] = obj.x
+					Component.Translate.y[world.player] = obj.y
 				}
 			} else if (obj.type === 'coin') {
 				const sseid = spriteSheets[spriteSheet.name]
-				if (!coinFactory) {
-					coinFactory = createCoin(world, sseid, animations)
-				}
+				const anims = animations[spriteSheet.name]
 
-				coinFactory(obj.x + 4, obj.y)
+				const width = spriteSheet.tileWidth
+				const height = spriteSheet.tileHeight
+
+				const dx = reqMap.tileWidth - width
+				const dy = reqMap.tileHeight - height
+
+				createCoin(
+					world,
+					sseid,
+					anims,
+					obj.x + dx + (width / 2),
+					obj.y + dy - (height / 2),
+					width,
+					height,
+					dx,
+					dy
+				)
 			} else if (obj.type === 'collider') {
-				createCollider(world, obj.x, obj.y, obj.width, obj.height)
+				const oneWay = hasProp('oneWay')(obj.properties) && obj.properties.oneWay
+				createCollider(world, obj.x, obj.y, obj.width, obj.height, oneWay)
 			} else if (obj.type === 'checkpoint') {
 				createCheckpoint(world, obj.x, obj.y, obj.width, obj.height)
 			} else if (obj.type === 'damageZone') {
 				createDamageZone(world, obj.x, obj.y, obj.width, obj.height)
-			} else if (obj.type === 'warp') {
-				const level = obj.properties.find(prop => prop.name === 'level').value
-				createWarp(world, obj.x, obj.y, obj.width, obj.height, level)
+
+			} else if (obj.type === 'event' && obj.name === 'warp') {
+				if (hasProp('level')(obj.properties)) {
+					createWarp(world, obj.x, obj.y, obj.width, obj.height, obj.properties.level)
+				}
 			} else if (obj.type === 'event') {
-				createEvent(world, obj.x, obj.y, obj.width, obj.height, obj.name)
+				const references = hasProp('references')(obj.properties) && obj.properties.references.split(',').map(n => parseInt(n, 10))
+				const id = world.events.references.add(references)
+				const [x, y] = toCartesian(obj.width, obj.height)(obj.x, obj.y)
+				const eid = createEvent(world, x, y, obj.width, obj.height, obj.name, id)
+
+				if (eid > -1 && spriteSheet) {
+					const sseid = spriteSheets[spriteSheet.name]
+					const cGid = clearFlags(obj.gid)
+					const gid = cGid - spriteSheet.firstgid
+
+					pipe(
+						addArchetype(world, Sprite),
+						setValues(Component.ID, { value: obj.id }),
+						setValues(Component.Sprite, {
+							spritesheet: sseid,
+							frame: gid,
+							index: 1
+						})
+					)(eid)
+				}
+			} else {
+				if (spriteSheet) {
+					const sseid = spriteSheets[spriteSheet.name]
+					const [x, y] = toCartesian(obj.width, obj.height)(obj.x, obj.y)
+					const cGid = clearFlags(obj.gid)
+					const gid = cGid - spriteSheet.firstgid
+
+					createSprite(
+						world,
+						sseid,
+						gid,
+						x,
+						y,
+						{ id: obj.id }
+					)
+				}
 			}
 		},
 		img => {
 			const spriteSheet = spriteSheets[img.name]
 
-			const width = SpriteSheet.frameWidth[spriteSheet]
-			const height = SpriteSheet.frameHeight[spriteSheet]
+			const width = Component.SpriteSheet.frameWidth[spriteSheet]
+			const height = Component.SpriteSheet.frameHeight[spriteSheet]
 
 			const countx = img.repeatx ? world.bounds.xMax / width : 1
 			const county = img.repeaty ? world.bounds.yMax / height : 1
@@ -190,7 +266,7 @@ const loadLevel = canvas => async (world, level) => {
 }
 
 export default (canvas) => {
-	const query = defineQuery([LoadLevel])
+	const query = defineQuery([Component.LoadLevel])
 	const load = loadLevel(canvas)
 
 	return async world => {
@@ -198,7 +274,7 @@ export default (canvas) => {
 
 		for (let index = 0; index < entities.length; index++) {
 			const id = entities[index]
-			const level = world.levels[LoadLevel.id[id]]
+			const level = world.levels[Component.LoadLevel.id[id]]
 
 			removeEntity(world, id)
 			await load(world, level)

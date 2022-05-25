@@ -15,4 +15,7 @@ export class BodyProxy extends BaseProxy {
 
 	get facing() { return this.store.facing[this.eid] }
 	set facing(val) { this.store.facing[this.eid] = val }
+
+	get rising() { return this.store.rising[this.eid] }
+	set rising(val) { this.store.rising[this.eid] = val }
 }

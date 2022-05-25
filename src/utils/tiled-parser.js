@@ -149,13 +149,14 @@ export const parseAnimations = pipe(
 	filter(hasProp('tiles')),
 	map(set => {
 		const firstgid = set.firstgid
-		const tiles = map(tile => ({ ...tile, gid: tile.id + firstgid }))(set.tiles)
+		const tiles = map(tile => ({ ...tile, gid: tile.id + firstgid, tileSet: set }))(set.tiles)
 		return { ...set, tiles }
 	}),
 	map(prop('tiles')),
 	flat(1),
 	filter(hasProp('animation')),
 	map(tile => ({
+		tileSet: tile.tileSet,
 		gid: tile.gid,
 		type: tile.type,
 		firstFrame: tile.id,
@@ -209,8 +210,9 @@ const loadFixedTileLayer = cb => layer => {
 const loadObjectLayer = cb => layer => {
 	const offset = offsetCoord(layer.x, layer.y)
 
-	layer.objects.forEach(({ x, y, ...obj }) => cb({
+	layer.objects.forEach(({ x, y, properties, ...obj }) => cb({
 		...offset({ x, y }),
+		properties: parseCustomProperties(properties),
 		...obj
 	}))
 }

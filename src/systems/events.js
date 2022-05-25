@@ -1,4 +1,4 @@
-import { defineQuery, hasComponent, removeEntity } from '../../static/js/bitecs.js'
+import { defineQuery, hasComponent, removeComponent, removeEntity } from '../../static/js/bitecs.js'
 import { Contact, Event, Player } from '../components/index.js'
 import { ContactProxy } from '../proxies/contact.js'
 
@@ -22,8 +22,9 @@ export default () => {
 				continue
 			}
 
-			events[Event.id[eid]].execute(world, eid)
-			removeEntity(world, eid)
+			events[Event.id[eid]].execute(world, eid, contact.a, contact.b)
+			// removeEntity(world, eid)
+			removeComponent(world, Event, eid)
 			removeEntity(world, contact.eid)
 		}
 

@@ -182,7 +182,8 @@ const loadLevel = canvas => async (world, level) => {
 				)
 			} else if (obj.type === 'collider') {
 				const oneWay = hasProp('oneWay')(obj.properties) && obj.properties.oneWay
-				createCollider(world, obj.x, obj.y, obj.width, obj.height, oneWay)
+				const eid = createCollider(world, obj.x, obj.y, obj.width, obj.height, oneWay)
+				Component.ID.value[eid] = obj.id
 			} else if (obj.type === 'checkpoint') {
 				createCheckpoint(world, obj.x, obj.y, obj.width, obj.height)
 			} else if (obj.type === 'damageZone') {

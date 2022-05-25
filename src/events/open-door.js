@@ -10,6 +10,7 @@ export async function execute(world, eventId, eid1, eid2) {
 
 	for (let index = 0; index < entities.length; index++) {
 		const eid = entities[index]
+		
 		if (references.includes(ID.value[eid])) {
 			removeEntity(world, eid)
 		}

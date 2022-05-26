@@ -1,3 +1,4 @@
+export * as TitleScreen from './title-screen.js'
 export * as JumpInfo from './jump-info.js'
 export * as DashInfo from './dash-info.js'
 export * as OpenDoor from './open-door.js'

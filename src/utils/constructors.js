@@ -188,7 +188,7 @@ export function createText(world, x, y, width, height, text, options) {
 }
 
 export function createWarp(world, x, y, w, h, level) {
-  const levelID = world.levels.findIndex(name => name === level)
+  const levelID = world.scenes.findIndex(name => name === level)
 
   if (levelID >= 0) {
     const eid = createEvent(world, x, y, w, h, 'warp')

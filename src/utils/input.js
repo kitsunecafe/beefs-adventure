@@ -157,6 +157,9 @@ export const Input = (canvas, width, height) => {
 			return !!keysUp[mapping.key] || !!gamepadUp[mapping.gamepad]
 		},
 		//
+		anyDown() {
+			return Object.keys(keys).length > 0 || Object.keys(gamepad).length > 0
+		},
 		getMousePosition() {
 			return mousePosition
 		},

@@ -1,0 +1,14 @@
+{ "columns":22,
+ "image":"..\/..\/image\/super_pixel_cave\/style_A\/spritesheet\/spritesheet.png",
+ "imageheight":558,
+ "imagewidth":358,
+ "margin":0,
+ "name":"cave",
+ "spacing":0,
+ "tilecount":748,
+ "tiledversion":"1.8.4",
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset",
+ "version":"1.8"
+}

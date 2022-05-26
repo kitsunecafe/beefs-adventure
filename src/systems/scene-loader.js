@@ -106,6 +106,7 @@ const loadLevel = canvas => async (world, level) => {
 	}
 
 	world.events.references = new Store(128)
+	const camera = createCamera(world, canvas.c)
 
 	loadMap(
 		reqMap,
@@ -151,7 +152,7 @@ const loadLevel = canvas => async (world, level) => {
 						spriteSheet.tileHeight
 					)
 
-					createCamera(world, canvas.c, world.player)
+					Component.Camera.following[camera] = world.player
 				} else {
 					Component.Sprite.spritesheet[world.player] = sseid
 
@@ -241,8 +242,11 @@ const loadLevel = canvas => async (world, level) => {
 			const countx = img.repeatx ? world.bounds.xMax / width : 1
 			const county = img.repeaty ? world.bounds.yMax / height : 1
 
-			const sx = img.offsetx + img.x - reqMap.tileWidth
-			const sy = img.offsety + img.y - reqMap.tileHeight
+			const ox = img.offsetx || 0
+			const oy = img.offsety || 0
+
+			const sx = ox + img.x - reqMap.tileWidth
+			const sy = oy + img.y - reqMap.tileHeight
 
 			const px = img.parallaxx || 1
 			const py = img.parallaxy || 1
@@ -275,7 +279,7 @@ export default (canvas) => {
 
 		for (let index = 0; index < entities.length; index++) {
 			const id = entities[index]
-			const level = world.levels[Component.LoadLevel.id[id]]
+			const level = world.scenes[Component.LoadLevel.id[id]]
 
 			removeEntity(world, id)
 			await load(world, level)

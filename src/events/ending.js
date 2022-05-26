@@ -1,5 +1,5 @@
 import { defineQuery, removeComponent, removeEntity } from '../../static/js/bitecs.js'
-import { Collider, Position, ReceivesInput, Intent, Text, Purse } from '../components/index.js'
+import { Position, ReceivesInput, Intent, Purse } from '../components/index.js'
 import { createText } from '../utils/constructors.js'
 import { sleep } from '../utils/helpers.js'
 
@@ -17,6 +17,8 @@ export async function execute(world, eventId) {
 	for (let index = 0; index < entities.length; index++) {
 		const id = entities[index]
 		Intent.movement[id] = 0
+		Intent.jump[id] = 0
+		Intent.dash[id] = 0
 		removeComponent(world, ReceivesInput, id)
 	}
 	const player = entities[0]

@@ -16,7 +16,7 @@ import removalSystem from './systems/removal.js'
 import checkpointSystem from './systems/checkpoint.js'
 import respawnSystem from './systems/respawn.js'
 import resourceLoader from './systems/resource-loader.js'
-import levelLoader from './systems/level-loader.js'
+import sceneLoader from './systems/scene-loader.js'
 import eventSystem from './systems/events.js'
 import textSystem from './systems/text.js'
 import movementSystem from './systems/movement.js'
@@ -31,7 +31,7 @@ async function create() {
   const world = createWorld()
   world.time = { fixedDelta: 0, delta: 0, elapsed: 0, elapsedFrames: 0 }
   world.canvas = canvas
-  world.levels = ['level-1-inf.tmj', 'mountain.tmj', 'cloud.tmj', 'end.tmj', 'cave.tmj', 'ice.tmj']
+  world.scenes = ['title.tmj', 'level-1-inf.tmj', 'mountain.tmj', 'cloud.tmj', 'end.tmj', 'cave.tmj', 'ice.tmj']
 
   const state = {
     canvas,
@@ -40,7 +40,7 @@ async function create() {
       resourceLoader(),
     ),
     updateSystems: pipe(
-      levelLoader(canvas),
+      sceneLoader(canvas),
       spritesheetSystem(),
       colliderSystem(),
       collectSystem(),
@@ -50,7 +50,6 @@ async function create() {
       oneWayCollisions(),
       physicsSystem(world),
       groundCheckSystem(),
-      // warpSystem(),
       eventSystem(),
     ),
     renderSystems: pipe(

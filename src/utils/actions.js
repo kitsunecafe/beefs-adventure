@@ -12,6 +12,7 @@ export function Actions(input) {
 	}
 
 	return {
+		input,
 		get movement() {
 			return input.getAxis().x
 		},

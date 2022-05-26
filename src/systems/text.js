@@ -84,9 +84,12 @@ export default () => {
 
 				addComponent(world, Sprite, eid)
 				Sprite.spritesheet[eid] = spriteSheet
+				Sprite.frame[eid] = 0
 				Sprite.scaleX[eid] = 1
 				Sprite.scaleY[eid] = 1
+				Sprite.index[eid] = 1
 			}).catch(err => {
+				console.error(err)
 				removeEntity(world, eid)
 			})
 		}

@@ -702,11 +702,11 @@
          "id":2,
          "name":"decorations",
          "opacity":1,
-         "startx":0,
+         "startx":48,
          "starty":0,
          "type":"tilelayer",
          "visible":true,
-         "width":96,
+         "width":48,
          "x":0,
          "y":0
         }, 
@@ -1861,6 +1861,18 @@
                  "width":48,
                  "x":-48,
                  "y":-112
+                }, 
+                {
+                 "gid":1633,
+                 "height":16,
+                 "id":133,
+                 "name":"",
+                 "rotation":0,
+                 "type":"playerSpawn",
+                 "visible":true,
+                 "width":16,
+                 "x":32,
+                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -2009,18 +2021,6 @@
                  "width":8,
                  "x":1140,
                  "y":84
-                }, 
-                {
-                 "gid":1633,
-                 "height":16,
-                 "id":131,
-                 "name":"",
-                 "rotation":0,
-                 "type":"playerSpawn",
-                 "visible":true,
-                 "width":16,
-                 "x":32,
-                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -2029,7 +2029,7 @@
          "y":0
         }],
  "nextlayerid":11,
- "nextobjectid":132,
+ "nextobjectid":134,
  "orientation":"orthogonal",
  "properties":[
         {

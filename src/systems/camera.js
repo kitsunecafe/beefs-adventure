@@ -32,7 +32,6 @@ export default () => {
 				} else if (target.y - camera.deadzoneY < position.y) {
 					position.y = target.y - camera.deadzoneY
 				}
-				// console.log(position.x, position.y)
 			}
 
 			viewport.update(position.x, position.y, camera.width, camera.height)

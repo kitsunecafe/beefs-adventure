@@ -14,6 +14,7 @@ const createSvg = (width, height, text, options) => `
 						font-family: ${options.family};
 						color: ${options.color};
 						font-size: ${options.size}px;
+						text-align: ${options.align};
 						line-height: ${options.lineHeight}px;
 				}
 				</style>

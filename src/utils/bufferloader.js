@@ -1,9 +1,8 @@
 export function loadBuffer(context, timeout, url) {
 	const to = timeout || 5000
 	return new Promise((resolve, reject) => {
-		setTimeout(reject, to, `timed out: ${url}`)
-
 		const request = new XMLHttpRequest()
+		request.timeout = to
 		request.open('GET', url, true)
 		request.responseType = 'arraybuffer'
 

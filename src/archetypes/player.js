@@ -21,8 +21,8 @@ export const Player = defineArchetype(
 		speed: 1.5,
 		jumpStrength: 0.02,
 		dashStrength: 0.65,
-		jumpDelay: 0.1,
-		dashDelay: 0.1
+		jumpDelay: 0.2,
+		dashDelay: 0.4
 	}),
 	defineProperty(EntityAnimation),
 	defineProperty(CurrentAnimation),

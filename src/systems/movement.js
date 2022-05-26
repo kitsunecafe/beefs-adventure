@@ -30,6 +30,7 @@ export default () => {
 	return world => {
 		const entities = query(world)
 		const bodies = world.physics.bodies.items.filter(identity)
+		const delta = world.time.fixedDelta
 
 		for (let index = 0; index < entities.length; index++) {
 			const eid = intent.eid = body.eid = collider.eid = position.eid = entities[index]
@@ -44,8 +45,8 @@ export default () => {
 				Velocity.y[eid] = composite.velocity.y
 			}
 
-			intent.jumpCooldown = Math.max(0, intent.jumpCooldown - world.time.delta)
-			intent.dashCooldown = Math.max(0, intent.dashCooldown - world.time.delta)
+			intent.jumpCooldown = Math.max(0, intent.jumpCooldown - delta)
+			intent.dashCooldown = Math.max(0, intent.dashCooldown - delta)
 
 			if (intent.jump != 0 && intent.jumpCooldown <= 0 && body.grounded) {
 				intent.jumpCooldown = intent.jumpDelay

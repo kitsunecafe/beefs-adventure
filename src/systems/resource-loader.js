@@ -23,7 +23,8 @@ export default () => {
 			bgm3: 'static/audio/Komiku - Cat City.mp3',
 			bgm4: 'static/audio/Komiku - Chillin\' Poupi.mp3',
 			bgm5: 'static/audio/Komiku - Serenity Temple.mp3',
-			bgm6: 'static/audio/Komiku - Mr Angst Theme.mp3'
+			bgm6: 'static/audio/Komiku - Mr Angst Theme.mp3',
+			bgm7: 'static/audio/Komiku - Poupi\'s Theme.mp3'
 		}
 
 		// Audio

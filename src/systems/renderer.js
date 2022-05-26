@@ -22,6 +22,7 @@ export default (canvas) => {
     canvas.cls()
 
     cameraPosition.eid = camera.eid = cameraQuery(world)[0]
+    console.log(cameraPosition.x, cameraPosition.y)
 
     if (camera.eid) {
       viewport.update(cameraPosition.x, cameraPosition.y, camera.width, camera.height)

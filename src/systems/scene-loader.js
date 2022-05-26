@@ -153,6 +153,7 @@ const loadLevel = canvas => async (world, level) => {
 					)
 
 					Component.Camera.following[camera] = world.player
+					console.log(Component.Camera.following[camera])
 				} else {
 					Component.Sprite.spritesheet[world.player] = sseid
 

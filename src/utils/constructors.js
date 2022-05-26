@@ -47,7 +47,7 @@ export function createCamera(world, canvas, target) {
   return pipe(
     createArchetype(world),
     setValues(Component.Camera, {
-      following: target,
+      following: target ? target : 0,
       width: canvas.width,
       height: canvas.height,
       deadzoneX: canvas.width / 3,

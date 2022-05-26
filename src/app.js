@@ -53,7 +53,7 @@ async function create() {
       eventSystem(),
     ),
     renderSystems: pipe(
-      statsSystem(),
+      // statsSystem(),
       inputSystem(),
       audioSystem(world.audioContext),
       animationSystem(),

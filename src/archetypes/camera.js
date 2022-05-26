@@ -5,6 +5,6 @@ import { GameObject } from './game-object.js'
 export const Camera = defineArchetype(
 	merge(GameObject),
 	defineProperty(CameraComponent),
-	defineProperty(Persistent)
+	// defineProperty(Persistent)
 )
 

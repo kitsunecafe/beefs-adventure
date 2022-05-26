@@ -35,7 +35,7 @@ export async function execute(world, eventId) {
 		3 * 1000,
 		world,
 		Position.x[eventId] - 64,
-		Position.y[eventId] - 64,
+		Position.y[eventId] + 16,
 		128,
 		128,
 		'HI BEEF! What are you doing out here?'
@@ -45,7 +45,7 @@ export async function execute(world, eventId) {
 		3.5 * 1000,
 		world,
 		Position.x[eventId] - 64,
-		Position.y[eventId] - 64,
+		Position.y[eventId] + 16,
 		128,
 		128,
 		'Did you came all this way to find me?'
@@ -55,7 +55,7 @@ export async function execute(world, eventId) {
 		4 * 1000,
 		world,
 		Position.x[eventId] - 64,
-		Position.y[eventId] - 64,
+		Position.y[eventId] + 16,
 		128,
 		128,
 		'Wow!! That\'s so impressive! Good job Beef!'
@@ -68,7 +68,7 @@ export async function execute(world, eventId) {
 				4 * 1000,
 				world,
 				Position.x[eventId] - 64,
-				Position.y[eventId] - 64,
+				Position.y[eventId] + 16,
 				128,
 				128,
 				'You even found a coin!'
@@ -78,7 +78,7 @@ export async function execute(world, eventId) {
 				4 * 1000,
 				world,
 				Position.x[eventId] - 64,
-				Position.y[eventId] - 64,
+				Position.y[eventId] + 16,
 				128,
 				128,
 				'Wait... you even found some coins?'
@@ -88,7 +88,7 @@ export async function execute(world, eventId) {
 				4 * 1000,
 				world,
 				Position.x[eventId] - 64,
-				Position.y[eventId] - 64,
+				Position.y[eventId] + 16,
 				128,
 				128,
 				`You found ${Purse.value[player]} of them!!`
@@ -99,7 +99,7 @@ export async function execute(world, eventId) {
 					4 * 1000,
 					world,
 					Position.x[eventId] - 64,
-					Position.y[eventId] - 64,
+					Position.y[eventId] + 16,
 					128,
 					128,
 					'How did you even carry all these?'
@@ -112,7 +112,7 @@ export async function execute(world, eventId) {
 		3 * 1000,
 		world,
 		Position.x[eventId] - 64,
-		Position.y[eventId] - 64,
+		Position.y[eventId] + 16,
 		128,
 		128,
 		'By the way... it looks like you came the long way.'
@@ -122,7 +122,7 @@ export async function execute(world, eventId) {
 		4 * 1000,
 		world,
 		Position.x[eventId] - 64,
-		Position.y[eventId] - 72,
+		Position.y[eventId] + 16,
 		128,
 		128,
 		'You know this beach is just to the west of our house, right?'
@@ -132,7 +132,7 @@ export async function execute(world, eventId) {
 		4 * 1000,
 		world,
 		Position.x[eventId] - 64,
-		Position.y[eventId] - 64,
+		Position.y[eventId] + 16,
 		128,
 		128,
 		'That\'s okay. Let\'s go to 7/11.'

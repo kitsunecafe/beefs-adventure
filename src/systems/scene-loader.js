@@ -106,7 +106,6 @@ const loadLevel = canvas => async (world, level) => {
 	}
 
 	world.events.references = new Store(128)
-	const camera = createCamera(world, canvas.c)
 
 	loadMap(
 		reqMap,
@@ -152,8 +151,6 @@ const loadLevel = canvas => async (world, level) => {
 						spriteSheet.tileHeight
 					)
 
-					Component.Camera.following[camera] = world.player
-					console.log(Component.Camera.following[camera])
 				} else {
 					Component.Sprite.spritesheet[world.player] = sseid
 
@@ -161,6 +158,8 @@ const loadLevel = canvas => async (world, level) => {
 					Component.Translate.x[world.player] = obj.x
 					Component.Translate.y[world.player] = obj.y
 				}
+				
+				createCamera(world, canvas.c, world.player)
 			} else if (obj.type === 'coin') {
 				const sseid = spriteSheets[spriteSheet.name]
 				const anims = animations[spriteSheet.name]

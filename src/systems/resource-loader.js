@@ -48,7 +48,7 @@ export default () => {
 
 		const eid = addEntity(world)
 		addComponent(world, LoadLevel, eid)
-		LoadLevel.id[eid] = 0
+		LoadLevel.id[eid] = 1
 
 		return world
 	}

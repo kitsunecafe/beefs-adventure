@@ -2013,14 +2013,14 @@
                 {
                  "gid":1633,
                  "height":16,
-                 "id":130,
+                 "id":131,
                  "name":"",
                  "rotation":0,
                  "type":"playerSpawn",
                  "visible":true,
                  "width":16,
-                 "x":992,
-                 "y":192
+                 "x":32,
+                 "y":80
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -2029,7 +2029,7 @@
          "y":0
         }],
  "nextlayerid":11,
- "nextobjectid":131,
+ "nextobjectid":132,
  "orientation":"orthogonal",
  "properties":[
         {
